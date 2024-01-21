@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -10,6 +11,18 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessPiece {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChessPiece that)) return false;
+        return color == that.color && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(color, type);
+    }
+
     private final ChessGame.TeamColor color;
     private PieceType type;
 
@@ -60,6 +73,80 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return new ArrayList<>();
+        ArrayList<ChessMove> chessMoves= new ArrayList<>();
+        ChessPosition endPosition;
+        if (getPieceType() == PieceType.BISHOP) {
+            //ChessMove(ChessPosition startPosition, ChessPosition endPosition,ChessPiece.PieceType promotionPiece)
+            for (int i = 1; i < 9; i++) {
+                if (myPosition.getRow() + i < 9 && myPosition.getColumn() + i < 9) {
+                    endPosition = new ChessPosition(myPosition.getRow()+i, myPosition.getColumn()+i);
+
+                    if(board.getPiece(endPosition) == null) // empty space
+                        chessMoves.add(new ChessMove(myPosition, endPosition, null));
+
+                    if(board.getPiece(endPosition) != null ) { // if there is a piece
+                        if (board.getPiece(endPosition).color.equals(getTeamColor())) // the piece is our color
+                            break;
+                        else {
+                            chessMoves.add(new ChessMove(myPosition, endPosition, null));
+                            break;
+                        }
+                    }
+                }
+            }
+            for (int i = 1; i < 9; i++) {
+                if (myPosition.getRow() - i > 0 && myPosition.getColumn() + i < 9) {
+                    endPosition = new ChessPosition(myPosition.getRow()-i, myPosition.getColumn()+i);
+                    if(board.getPiece(endPosition) == null) // empty space
+                        chessMoves.add(new ChessMove(myPosition, endPosition, null));
+
+                    if(board.getPiece(endPosition) != null ) { // if there is a piece
+                        if (board.getPiece(endPosition).color.equals(getTeamColor())) // the piece is our color
+                            break;
+                        else {
+                            chessMoves.add(new ChessMove(myPosition, endPosition, null));
+                            break;
+                        }
+                    }
+                }
+            }
+            for (int i = 1; i < 9; i++) {
+                if (myPosition.getRow() - i > 0 && myPosition.getColumn() - i > 0) {
+                    endPosition = new ChessPosition(myPosition.getRow()-i, myPosition.getColumn()-i);
+                    if(board.getPiece(endPosition) == null) // empty space
+                        chessMoves.add(new ChessMove(myPosition, endPosition, null));
+
+                    if(board.getPiece(endPosition) != null ) { // if there is a piece
+                        if (board.getPiece(endPosition).color.equals(getTeamColor())) // the piece is our color
+                            break;
+                        else {
+                            chessMoves.add(new ChessMove(myPosition, endPosition, null));
+                            break;
+                        }
+                    }
+                }
+            }
+            for (int i = 1; i < 9; i++) {
+                if (myPosition.getRow() + i < 9 && myPosition.getColumn() - i > 0) {
+                    endPosition = new ChessPosition(myPosition.getRow()+i, myPosition.getColumn()-i);
+                    if(board.getPiece(endPosition) == null) // empty space
+                        chessMoves.add(new ChessMove(myPosition, endPosition, null));
+
+                    if(board.getPiece(endPosition) != null ) { // if there is a piece
+                        if (board.getPiece(endPosition).color.equals(getTeamColor())) // the piece is our color
+                            break;
+                        else {
+                            chessMoves.add(new ChessMove(myPosition, endPosition, null));
+                            break;
+                        }
+                    }
+                }
+            }
+
+        }
+        for (ChessMove move: chessMoves) {
+            System.out.println(move.getEndPosition().getRow() + " " + move.getEndPosition().getColumn());
+        }
+        return chessMoves;
     }
 }
