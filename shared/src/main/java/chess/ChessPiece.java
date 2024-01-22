@@ -178,7 +178,7 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> chessMoves= new ArrayList<>();
 
-        if (getPieceType() == PieceType.BISHOP) {
+        if (getPieceType() == PieceType.BISHOP || getPieceType() == PieceType.QUEEN) {
             chessMoves = bishopMoves(myPosition, board, chessMoves,1,1);
             chessMoves = bishopMoves(myPosition, board, chessMoves,-1,1);
             chessMoves = bishopMoves(myPosition, board, chessMoves,-1,-1);
@@ -219,12 +219,13 @@ public class ChessPiece {
             chessMoves = pawnMoves(myPosition, board, chessMoves,1, -1, PieceType.ROOK);
             chessMoves = pawnMoves(myPosition, board, chessMoves, 2, 0, null);
         }
-        else if (getPieceType() == PieceType.ROOK) {
+        if (getPieceType() == PieceType.ROOK || getPieceType() == PieceType.QUEEN) {
             chessMoves = rookMoves(myPosition, board, chessMoves,1,0);
             chessMoves = rookMoves(myPosition, board, chessMoves,-1,0);
             chessMoves = rookMoves(myPosition, board, chessMoves,0,1);
             chessMoves = rookMoves(myPosition, board, chessMoves,0,-1);
         }
+
         return chessMoves;
     }
 }
