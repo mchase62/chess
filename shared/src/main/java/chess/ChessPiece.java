@@ -133,6 +133,41 @@ public class ChessPiece {
         }
         return chessMoves;
     }
+
+    public ArrayList<ChessMove> rookMoves(ChessPosition myPosition, ChessBoard board, ArrayList<ChessMove> chessMoves, int rowDirection, int colDirection) {
+        ChessPosition endPosition;
+        boolean condition = false;
+        for (int i = 1; i < 9; i++) {
+            // find the board limit conditions
+            if(rowDirection == 1 && colDirection == 0)
+                condition = myPosition.getRow() + i < 9;
+            else if(rowDirection == -1 && colDirection == 0)
+                condition = myPosition.getRow() - i > 0;
+            else if(colDirection == 1)
+                condition = myPosition.getColumn() + i < 9;
+            else
+                condition = myPosition.getColumn() - i > 0;
+            if (condition) {
+                endPosition = new ChessPosition(myPosition.getRow()+(i*rowDirection), myPosition.getColumn()+(i*colDirection));
+
+                if(board.getPiece(endPosition) == null) // empty space
+                    chessMoves.add(new ChessMove(myPosition, endPosition, null));
+
+                if(board.getPiece(endPosition) != null ) { // if there is a piece
+                    if (board.getPiece(endPosition).color.equals(getTeamColor())) // the piece is our color
+                        break;
+                    else {
+                        chessMoves.add(new ChessMove(myPosition, endPosition, null));
+                        break;
+                    }
+                }
+            }
+        }
+        for (ChessMove move : chessMoves) {
+            System.out.println(move.getEndPosition().getRow() + " " + move.getEndPosition().getColumn());
+        }
+        return chessMoves;
+    }
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -183,6 +218,12 @@ public class ChessPiece {
             chessMoves = pawnMoves(myPosition, board, chessMoves,1, 1, PieceType.ROOK);
             chessMoves = pawnMoves(myPosition, board, chessMoves,1, -1, PieceType.ROOK);
             chessMoves = pawnMoves(myPosition, board, chessMoves, 2, 0, null);
+        }
+        else if (getPieceType() == PieceType.ROOK) {
+            chessMoves = rookMoves(myPosition, board, chessMoves,1,0);
+            chessMoves = rookMoves(myPosition, board, chessMoves,-1,0);
+            chessMoves = rookMoves(myPosition, board, chessMoves,0,1);
+            chessMoves = rookMoves(myPosition, board, chessMoves,0,-1);
         }
         return chessMoves;
     }
