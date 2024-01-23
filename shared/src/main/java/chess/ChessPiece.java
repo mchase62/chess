@@ -68,22 +68,31 @@ public class ChessPiece {
     }
 
     public HashSet<ChessMove> pawnMoves(ChessPosition myPosition, ChessBoard board, HashSet<ChessMove> chessMoves, int row, int col, PieceType promotionPiece) {
+        System.out.println("row is " + row + " col is " + col + " promotion is " + promotionPiece);
         ChessPosition endPosition;
         if ((myPosition.getRow() != 7 && getTeamColor() == ChessGame.TeamColor.WHITE) || (myPosition.getRow() != 2 && getTeamColor() == ChessGame.TeamColor.BLACK)) // if not the last row, can't promote
             promotionPiece = null;
+        if ((row == 2 && ((myPosition.getRow() != 2 && getTeamColor() == ChessGame.TeamColor.WHITE) || myPosition.getRow() != 7 && getTeamColor() == ChessGame.TeamColor.BLACK))) // if move is to jump two, but we're not at intitial spot
+            return chessMoves;
         if (((myPosition.getRow() != 2 && getTeamColor() == ChessGame.TeamColor.WHITE) || (myPosition.getRow() != 7 && getTeamColor() == ChessGame.TeamColor.BLACK)) // if not initial spot
         || ((getTeamColor() == ChessGame.TeamColor.WHITE && board.getPiece(new ChessPosition(3, myPosition.getColumn()))!= null) || (getTeamColor() == ChessGame.TeamColor.BLACK && board.getPiece(new ChessPosition(6, myPosition.getColumn()))!= null))) // or there's a piece blocking the 2 square jump
             row = 1;
         if (getTeamColor() == ChessGame.TeamColor.BLACK) // change directions for black
             row *= -1;
         endPosition = new ChessPosition(myPosition.getRow() + row, myPosition.getColumn() + col);
-        if (board.getPiece(endPosition) == null && col == 0) // empty space in front
+        if (board.getPiece(endPosition) == null && col == 0) {
+            // empty space in front
             chessMoves.add(new ChessMove(myPosition, endPosition, promotionPiece));
+            System.out.println(endPosition.getRow() + " " + endPosition.getColumn() + " " + promotionPiece + " added");
+        }
+
         else if (board.getPiece(endPosition) != null && col == 0) { // if there is a piece in front
             return chessMoves;
         }
-        else if (board.getPiece(endPosition) != null && col != 0 && !board.getPiece(endPosition).color.equals(getTeamColor())) // if there is a diagonal piece on the other team
+        else if (board.getPiece(endPosition) != null && col != 0 && !board.getPiece(endPosition).color.equals(getTeamColor())) { // if there is a diagonal piece on the other team
             chessMoves.add(new ChessMove(myPosition, endPosition, promotionPiece));
+            System.out.println(endPosition.getRow() + " " + endPosition.getColumn() + " " + promotionPiece + " added");
+        }
         return chessMoves;
     }
 
@@ -219,6 +228,9 @@ public class ChessPiece {
             chessMoves = pawnMoves(myPosition, board, chessMoves,1, 1, PieceType.ROOK);
             chessMoves = pawnMoves(myPosition, board, chessMoves,1, -1, PieceType.ROOK);
             chessMoves = pawnMoves(myPosition, board, chessMoves, 2, 0, null);
+            for (ChessMove move: chessMoves) {
+                System.out.println(move.getEndPosition().getRow() + " " + move.getStartPosition().getColumn());
+            }
         }
         if (getPieceType() == PieceType.ROOK || getPieceType() == PieceType.QUEEN) {
             chessMoves = rookMoves(myPosition, board, chessMoves,1,0);
