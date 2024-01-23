@@ -21,7 +21,7 @@ public class ChessBoard {
         return Arrays.deepHashCode(squares);
     }
 
-    private ChessPiece[][] squares = new ChessPiece[9][9];
+    private ChessPiece[][] squares = new ChessPiece[8][8];
     public ChessBoard() {
         
     }
@@ -29,8 +29,8 @@ public class ChessBoard {
     @Override
     public String toString() {
         String stringBoard = "";
-        for (int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
                 stringBoard = stringBoard + " " + i + " " + j + "\n";
                 if (squares[i][j] != null)
                     stringBoard = stringBoard + squares[i][j].getTeamColor() + " " + squares[i][j].getPieceType() + "\n";
@@ -46,7 +46,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        squares[position.getRow()][position.getColumn()] = piece;
+        squares[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
     /**
@@ -57,7 +57,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return squares[position.getRow()][position.getColumn()];
+        return squares[position.getRow()-1][position.getColumn()-1];
     }
 
     /**
@@ -99,13 +99,5 @@ public class ChessBoard {
         // set kings
         addPiece(new ChessPosition(1,5),new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
         addPiece(new ChessPosition(8,5),new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
-//        for (int i = 1; i < 9; i++) {
-//            for (int j = 1; j < 9; j++) {
-//                System.out.println("Row: " + i + " Col: " + j);
-//                if (squares[i][j] != null)
-//                    System.out.println(squares[i][j].getPieceType());
-//            }
-//        }
-
     }
 }

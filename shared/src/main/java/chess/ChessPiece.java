@@ -68,7 +68,6 @@ public class ChessPiece {
     }
 
     public HashSet<ChessMove> pawnMoves(ChessPosition myPosition, ChessBoard board, HashSet<ChessMove> chessMoves, int row, int col, PieceType promotionPiece) {
-        System.out.println("row is " + row + " col is " + col + " promotion is " + promotionPiece);
         ChessPosition endPosition;
         if ((myPosition.getRow() != 7 && getTeamColor() == ChessGame.TeamColor.WHITE) || (myPosition.getRow() != 2 && getTeamColor() == ChessGame.TeamColor.BLACK)) // if not the last row, can't promote
             promotionPiece = null;
@@ -83,7 +82,6 @@ public class ChessPiece {
         if (board.getPiece(endPosition) == null && col == 0) {
             // empty space in front
             chessMoves.add(new ChessMove(myPosition, endPosition, promotionPiece));
-            System.out.println(endPosition.getRow() + " " + endPosition.getColumn() + " " + promotionPiece + " added");
         }
 
         else if (board.getPiece(endPosition) != null && col == 0) { // if there is a piece in front
@@ -91,7 +89,6 @@ public class ChessPiece {
         }
         else if (board.getPiece(endPosition) != null && col != 0 && !board.getPiece(endPosition).color.equals(getTeamColor())) { // if there is a diagonal piece on the other team
             chessMoves.add(new ChessMove(myPosition, endPosition, promotionPiece));
-            System.out.println(endPosition.getRow() + " " + endPosition.getColumn() + " " + promotionPiece + " added");
         }
         return chessMoves;
     }
@@ -173,9 +170,6 @@ public class ChessPiece {
                 }
             }
         }
-        for (ChessMove move : chessMoves) {
-            System.out.println(move.getEndPosition().getRow() + " " + move.getEndPosition().getColumn());
-        }
         return chessMoves;
     }
     /**
@@ -228,9 +222,6 @@ public class ChessPiece {
             chessMoves = pawnMoves(myPosition, board, chessMoves,1, 1, PieceType.ROOK);
             chessMoves = pawnMoves(myPosition, board, chessMoves,1, -1, PieceType.ROOK);
             chessMoves = pawnMoves(myPosition, board, chessMoves, 2, 0, null);
-            for (ChessMove move: chessMoves) {
-                System.out.println(move.getEndPosition().getRow() + " " + move.getStartPosition().getColumn());
-            }
         }
         if (getPieceType() == PieceType.ROOK || getPieceType() == PieceType.QUEEN) {
             chessMoves = rookMoves(myPosition, board, chessMoves,1,0);
