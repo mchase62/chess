@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -12,16 +13,17 @@ import java.util.Objects;
  */
 public class ChessPiece {
     @Override
+    public int hashCode() {
+        return Objects.hash(color, type);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ChessPiece that)) return false;
         return color == that.color && type == that.type;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(color, type);
-    }
 
     private final ChessGame.TeamColor color;
     private PieceType type;
@@ -65,7 +67,7 @@ public class ChessPiece {
         this.type = newType;
     }
 
-    public ArrayList<ChessMove> pawnMoves(ChessPosition myPosition, ChessBoard board, ArrayList<ChessMove> chessMoves, int row, int col, PieceType promotionPiece) {
+    public HashSet<ChessMove> pawnMoves(ChessPosition myPosition, ChessBoard board, HashSet<ChessMove> chessMoves, int row, int col, PieceType promotionPiece) {
         ChessPosition endPosition;
         if ((myPosition.getRow() != 7 && getTeamColor() == ChessGame.TeamColor.WHITE) || (myPosition.getRow() != 2 && getTeamColor() == ChessGame.TeamColor.BLACK)) // if not the last row, can't promote
             promotionPiece = null;
@@ -82,11 +84,10 @@ public class ChessPiece {
         }
         else if (board.getPiece(endPosition) != null && col != 0 && !board.getPiece(endPosition).color.equals(getTeamColor())) // if there is a diagonal piece on the other team
             chessMoves.add(new ChessMove(myPosition, endPosition, promotionPiece));
-        System.out.println(endPosition.getRow() + " " + endPosition.getColumn());
         return chessMoves;
     }
 
-    public ArrayList<ChessMove> kingKnightMoves(ChessPosition myPosition, ChessBoard board, ArrayList<ChessMove> chessMoves, int row, int col) {
+    public HashSet<ChessMove> kingKnightMoves(ChessPosition myPosition, ChessBoard board, HashSet<ChessMove> chessMoves, int row, int col) {
         ChessPosition endPosition;
         // check if in bounds
         if (myPosition.getRow() + row < 9 && myPosition.getRow() + row > 0 && myPosition.getColumn() + col > 0 && myPosition.getColumn() + col < 9) {
@@ -103,7 +104,7 @@ public class ChessPiece {
         }
         return chessMoves;
     }
-    public ArrayList<ChessMove> bishopMoves(ChessPosition myPosition, ChessBoard board, ArrayList<ChessMove> chessMoves, int rowDirection, int colDirection) {
+    public HashSet<ChessMove> bishopMoves(ChessPosition myPosition, ChessBoard board, HashSet<ChessMove> chessMoves, int rowDirection, int colDirection) {
         ChessPosition endPosition;
         boolean condition = false;
         for (int i = 1; i < 9; i++) {
@@ -134,7 +135,7 @@ public class ChessPiece {
         return chessMoves;
     }
 
-    public ArrayList<ChessMove> rookMoves(ChessPosition myPosition, ChessBoard board, ArrayList<ChessMove> chessMoves, int rowDirection, int colDirection) {
+    public HashSet<ChessMove> rookMoves(ChessPosition myPosition, ChessBoard board, HashSet<ChessMove> chessMoves, int rowDirection, int colDirection) {
         ChessPosition endPosition;
         boolean condition = false;
         for (int i = 1; i < 9; i++) {
@@ -176,7 +177,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ArrayList<ChessMove> chessMoves= new ArrayList<>();
+        HashSet<ChessMove> chessMoves= new HashSet<>();
 
         if (getPieceType() == PieceType.BISHOP || getPieceType() == PieceType.QUEEN) {
             chessMoves = bishopMoves(myPosition, board, chessMoves,1,1);
