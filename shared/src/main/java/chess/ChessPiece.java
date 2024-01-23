@@ -225,7 +225,6 @@ public class ChessPiece {
             chessMoves = rookMoves(myPosition, board, chessMoves,0,1);
             chessMoves = rookMoves(myPosition, board, chessMoves,0,-1);
         }
-
         return chessMoves;
     }
 }
