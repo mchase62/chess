@@ -53,7 +53,7 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-
+        ChessPiece replacingPiece;
         if (board.getPiece(startPosition) == null)  // if there is not a piece
             return null;
 
@@ -63,12 +63,13 @@ public class ChessGame {
         ArrayList<ChessMove> movesToRemove = new ArrayList<>();
 
         for (ChessMove move : chessMoves) {
+            replacingPiece = board.getPiece(move.getEndPosition());
             try {
                 makeMove(move);  // try making the move
             } catch (InvalidMoveException e) {
                 movesToRemove.add(move);
             } finally {
-                undoMove(move); // always undo the move, whether it's valid or not
+                undoMove(move, replacingPiece); // always undo the move, whether it's valid or not
             }
         }
         chessMoves.removeAll(movesToRemove);
@@ -88,13 +89,14 @@ public class ChessGame {
         board.addPiece(move.getEndPosition(),movingPiece); // move it to the new spot
 
         // throw exception if piece can't move there, if move leaves king in danger, or not your turn
-        if (isInCheck(movingPiece.getTeamColor())) {// see if the king is now in danger
+        if (movingPiece == null || isInCheck(movingPiece.getTeamColor())) {// see if the king is now in danger
             throw new InvalidMoveException("Invalid move: " + move);
         }
     }
 
-    public void undoMove(ChessMove move) {
-
+    public void undoMove(ChessMove move, ChessPiece replacingPiece) {
+        board.addPiece(move.getStartPosition(), board.getPiece(move.getEndPosition()));
+        board.addPiece(move.getEndPosition(), replacingPiece);
     }
     /**
      * Determines if the given team is in check
