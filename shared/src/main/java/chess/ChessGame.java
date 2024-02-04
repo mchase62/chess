@@ -86,7 +86,7 @@ public class ChessGame {
         // make move
         ChessPiece movingPiece = board.getPiece(move.getStartPosition()); // copy the piece
         board.addPiece(move.getStartPosition(), null); // make its old location null
-        board.addPiece(move.getEndPosition(),movingPiece); // move it to the new spot
+        board.addPiece(move.getEndPosition(), movingPiece); // move it to the new spot
 
         // throw exception if piece can't move there, if move leaves king in danger, or not your turn
         if (movingPiece == null || isInCheck(movingPiece.getTeamColor())) {// see if the king is now in danger
@@ -109,7 +109,6 @@ public class ChessGame {
         ChessPosition checkingPosition;
         Collection<ChessMove> checkingMoves;
         ChessPiece king = new ChessPiece(teamColor, ChessPiece.PieceType.KING); // king of teamColor
-        System.out.println("Team color " + teamColor.toString());
         // go through every piece of opposite color and see if piece moves' end position has king
         for(int row = 1; row < 9; row++) {
             for(int col = 1; col < 9; col++) {
@@ -136,7 +135,37 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        boolean isChecked;
+        ChessPosition checkingPosition;
+        ChessPiece checkingPiece;
+        Collection<ChessMove> checkingMoves;
+        if(!isInCheck(teamColor))
+            return false;
+        for(int row = 1; row < 9; row++) {
+            for(int col = 1; col < 9; col++) {
+                checkingPosition = new ChessPosition(row,col);
+                checkingPiece = board.getPiece(checkingPosition);
+                if(checkingPiece!=null) { // if there is a piece
+                    if(checkingPiece.getTeamColor().equals(teamColor)){ // if the piece is our color, check
+                        checkingMoves = checkingPiece.pieceMoves(board,checkingPosition); // get all the moves
+                        isChecked = false;
+                        for( ChessMove move : checkingMoves) { // go through the piece moves and see if still in check
+                            try { // make the move
+                                makeMove(move);  // try making the move
+                            } catch (InvalidMoveException e) { // if move leaves king in check
+                                isChecked = true;
+                            } finally {
+                                // Always undo the move, whether it's valid or not
+                                undoMove(move, checkingPiece);
+                            }
+                            if (!isChecked) // if not in check
+                                return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
