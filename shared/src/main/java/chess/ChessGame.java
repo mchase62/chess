@@ -1,9 +1,7 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
+
 /**
  * For a class that can manage a chess game, making moves on a board
  * <p>
@@ -12,13 +10,27 @@ import java.util.Iterator;
  */
 public class ChessGame {
     private ChessBoard board;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.deepEquals(board, chessGame.board) && teamTurn == chessGame.teamTurn && Objects.equals(lastStartPosition, chessGame.lastStartPosition) && Objects.equals(lastEndPosition, chessGame.lastEndPosition) && lastPromotionPiece == chessGame.lastPromotionPiece;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, teamTurn, lastStartPosition, lastEndPosition, lastPromotionPiece);
+    }
+
     private TeamColor teamTurn;
     private ChessPosition lastStartPosition;
     private ChessPosition lastEndPosition;
     ChessPiece.PieceType lastPromotionPiece;
 
     public ChessGame() {
-
+        teamTurn = TeamColor.WHITE;
     }
 
     /**
@@ -83,20 +95,47 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        System.out.println("Beginning of move");
+        System.out.println(board.toString());
+        Collection<ChessMove> moves;
         // make move
         ChessPiece movingPiece = board.getPiece(move.getStartPosition()); // copy the piece
+        if(movingPiece != null)
+            moves = movingPiece.pieceMoves(board,move.getStartPosition());
+        else
+            moves = null;
         board.addPiece(move.getStartPosition(), null); // make its old location null
         board.addPiece(move.getEndPosition(), movingPiece); // move it to the new spot
-
+        System.out.println("After moving");
+        System.out.println(board.toString());
         // throw exception if piece can't move there, if move leaves king in danger, or not your turn
-        if (movingPiece == null || isInCheck(movingPiece.getTeamColor())) {// see if the king is now in danger
+        if (movingPiece == null || isInCheck(movingPiece.getTeamColor()) || !getTeamTurn().equals(movingPiece.getTeamColor())) {// see if the king is now in danger
+            System.out.println("A");
+            System.out.println(move.getStartPosition().toString() + " " + move.getEndPosition().toString());
+            undoMove(move,movingPiece);
             throw new InvalidMoveException("Invalid move: " + move);
         }
+        else if (!moves.contains(move)) {
+            System.out.println("B");
+            System.out.println(move.getStartPosition().toString() + " " + move.getEndPosition().toString());
+            undoMove(move,movingPiece);
+            throw new InvalidMoveException("Invalid move: " + move);
+        }
+        System.out.println("After move");
+        System.out.println(board.toString());
+        if(getTeamTurn()==TeamColor.WHITE)
+            setTeamTurn(TeamColor.BLACK);
+        else
+            setTeamTurn(TeamColor.WHITE);
     }
 
     public void undoMove(ChessMove move, ChessPiece replacingPiece) {
         board.addPiece(move.getStartPosition(), board.getPiece(move.getEndPosition()));
         board.addPiece(move.getEndPosition(), replacingPiece);
+        if(getTeamTurn()==TeamColor.WHITE)
+            setTeamTurn(TeamColor.BLACK);
+        else
+            setTeamTurn(TeamColor.WHITE);
     }
     /**
      * Determines if the given team is in check
@@ -154,8 +193,7 @@ public class ChessGame {
                                 makeMove(move);  // try making the move
                             } catch (InvalidMoveException e) { // if move leaves king in check
                                 isChecked = true;
-                            } finally {
-                                // Always undo the move, whether it's valid or not
+                            } finally { // Always undo the move, whether it's valid or not
                                 undoMove(move, checkingPiece);
                             }
                             if (!isChecked) // if not in check

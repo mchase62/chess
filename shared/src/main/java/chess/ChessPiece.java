@@ -79,6 +79,8 @@ public class ChessPiece {
         if (getTeamColor() == ChessGame.TeamColor.BLACK) // change directions for black
             row *= -1;
         endPosition = new ChessPosition(myPosition.getRow() + row, myPosition.getColumn() + col);
+        if(endPosition.getRow() < 1 || endPosition.getColumn() < 1 || endPosition.getRow() > 8 || endPosition.getColumn() > 8)
+            return chessMoves;
         if (board.getPiece(endPosition) == null && col == 0) {
             // empty space in front
             chessMoves.add(new ChessMove(myPosition, endPosition, promotionPiece));

@@ -28,15 +28,20 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        String stringBoard = "";
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                stringBoard = stringBoard + " " + i + " " + j + "\n";
-                if (squares[i][j] != null)
-                    stringBoard = stringBoard + squares[i][j].getTeamColor() + " " + squares[i][j].getPieceType() + "\n";
+        StringBuilder stringBoard = new StringBuilder();
+
+        for (int i = 0; i < squares.length; i++) {
+            for (int j = 0; j < squares[i].length; j++) {
+                if (squares[i][j] != null) {
+                    stringBoard.append("|").append(squares[i][j].getPieceType());
+                } else {
+                    stringBoard.append("| ");
+                }
             }
+            stringBoard.append("|\n");
         }
-        return stringBoard;
+
+        return stringBoard.toString();
     }
 
     /**
