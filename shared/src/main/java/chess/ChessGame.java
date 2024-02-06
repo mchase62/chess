@@ -57,6 +57,12 @@ public class ChessGame {
         BLACK
     }
 
+    public void switchTurns() {
+        if(getTeamTurn()==TeamColor.WHITE)
+            setTeamTurn(TeamColor.BLACK);
+        else
+            setTeamTurn(TeamColor.WHITE);
+    }
     /**
      * Gets a valid moves for a piece at the given location
      *
@@ -66,29 +72,33 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece replacingPiece;
+        ChessPiece movingPiece;
         if (board.getPiece(startPosition) == null)  // if there is not a piece
             return null;
 
         // get all moves
         Collection<ChessMove> chessMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
-
+        System.out.println(board.getPiece(startPosition).getPieceType());
         ArrayList<ChessMove> movesToRemove = new ArrayList<>();
+        movingPiece = board.getPiece(startPosition);
 
         for (ChessMove move : chessMoves) {
             replacingPiece = board.getPiece(move.getEndPosition());
             try {
+                if (movingPiece!=null) {
+                    setTeamTurn(movingPiece.getTeamColor());
+                }
                 makeMove(move);  // try making the move
-                if(getTeamTurn()==TeamColor.WHITE)
-                    setTeamTurn(TeamColor.BLACK);
-                else
-                    setTeamTurn(TeamColor.WHITE);
                 undoMove(move, replacingPiece); // always undo the move, whether it's valid or not
+                switchTurns();
 
             } catch (InvalidMoveException e) {
+                System.out.println(move.toString());
                 movesToRemove.add(move);
             }
         }
         chessMoves.removeAll(movesToRemove);
+
         return chessMoves;
     }
 
@@ -99,40 +109,29 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        System.out.println("Beginning of move");
-        System.out.println(board.toString());
         Collection<ChessMove> moves;
         // make move
         ChessPiece movingPiece = board.getPiece(move.getStartPosition()); // copy the piece
         ChessPiece replacingPiece = board.getPiece(move.getEndPosition()); // copy the piece at end position
         if(movingPiece != null)
-            moves = movingPiece.pieceMoves(board,move.getStartPosition()); // change to valid moves
+            moves = movingPiece.pieceMoves(board,move.getStartPosition());
         else
             moves = null;
         board.addPiece(move.getStartPosition(), null); // make its old location null
         board.addPiece(move.getEndPosition(), movingPiece); // move it to the new spot
-        System.out.println("After moving");
-        System.out.println(board.toString());
         // throw exception if piece can't move there, if move leaves king in danger, or not your turn
+        if (movingPiece!=null) {
+        }
         if (movingPiece == null || isInCheck(movingPiece.getTeamColor()) || !getTeamTurn().equals(movingPiece.getTeamColor())) {// see if the king is now in danger
-            System.out.println("A");
-            System.out.println(move.getStartPosition().toString() + " " + move.getEndPosition().toString());
             undoMove(move,replacingPiece);
             throw new InvalidMoveException("Invalid move: " + move);
         }
         else if (!moves.contains(move)) { // if move isn't in valid moves
-            System.out.println("B");
-            System.out.println(move.getStartPosition().toString() + " " + move.getEndPosition().toString());
             undoMove(move,replacingPiece);
             throw new InvalidMoveException("Invalid move: " + move);
         }
-        System.out.println("After move");
-        System.out.println(board.toString());
         // switch turns
-        if(getTeamTurn()==TeamColor.WHITE)
-            setTeamTurn(TeamColor.BLACK);
-        else
-            setTeamTurn(TeamColor.WHITE);
+        switchTurns();
     }
 
     public void undoMove(ChessMove move, ChessPiece replacingPiece) {
