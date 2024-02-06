@@ -215,25 +215,24 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-//        ChessPiece king = new ChessPiece(teamColor, ChessPiece.PieceType.KING); // king of teamColor
-//        ChessPiece checkingPiece;
-//        ChessPosition kingPosition;
-//        boolean found = false;
-//        // find the king
-//        for(int row = 1; row < 9; row++) {
-//            if(found)
-//                break;
-//            for(int col = 1; col < 9; col++) {
-//                kingPosition = new ChessPosition(row, col);
-//                checkingPiece = board.getPiece(kingPosition);
-//                if(checkingPiece.equals(king)) { // found the king
-//                    found = true;
-//                    break;
-//                }
-//            }
-//        }
-//        if(validMoves(kingPosition).isEmpty())
-            return true;
+        ChessPiece king = new ChessPiece(teamColor, ChessPiece.PieceType.KING); // king of teamColor
+        ChessPiece checkingPiece;
+        ChessPosition kingPosition = new ChessPosition(1,1);
+        boolean found = false;
+
+        // find the king
+        outerLoop:
+        for(int row = 1; row < 9; row++) {
+            for(int col = 1; col < 9; col++) {
+                kingPosition = new ChessPosition(row, col);
+                checkingPiece = board.getPiece(kingPosition);
+                if (checkingPiece != null) {
+                    if(checkingPiece.equals(king))  // found the king
+                        break outerLoop;
+                }
+            }
+        }
+        return validMoves(kingPosition).isEmpty(); // returns true if the king has no available valid moves
     }
 
     /**
