@@ -78,10 +78,14 @@ public class ChessGame {
             replacingPiece = board.getPiece(move.getEndPosition());
             try {
                 makeMove(move);  // try making the move
+                if(getTeamTurn()==TeamColor.WHITE)
+                    setTeamTurn(TeamColor.BLACK);
+                else
+                    setTeamTurn(TeamColor.WHITE);
+                undoMove(move, replacingPiece); // always undo the move, whether it's valid or not
+
             } catch (InvalidMoveException e) {
                 movesToRemove.add(move);
-            } finally {
-                undoMove(move, replacingPiece); // always undo the move, whether it's valid or not
             }
         }
         chessMoves.removeAll(movesToRemove);
@@ -100,8 +104,9 @@ public class ChessGame {
         Collection<ChessMove> moves;
         // make move
         ChessPiece movingPiece = board.getPiece(move.getStartPosition()); // copy the piece
+        ChessPiece replacingPiece = board.getPiece(move.getEndPosition()); // copy the piece at end position
         if(movingPiece != null)
-            moves = movingPiece.pieceMoves(board,move.getStartPosition());
+            moves = movingPiece.pieceMoves(board,move.getStartPosition()); // change to valid moves
         else
             moves = null;
         board.addPiece(move.getStartPosition(), null); // make its old location null
@@ -112,17 +117,18 @@ public class ChessGame {
         if (movingPiece == null || isInCheck(movingPiece.getTeamColor()) || !getTeamTurn().equals(movingPiece.getTeamColor())) {// see if the king is now in danger
             System.out.println("A");
             System.out.println(move.getStartPosition().toString() + " " + move.getEndPosition().toString());
-            undoMove(move,movingPiece);
+            undoMove(move,replacingPiece);
             throw new InvalidMoveException("Invalid move: " + move);
         }
-        else if (!moves.contains(move)) {
+        else if (!moves.contains(move)) { // if move isn't in valid moves
             System.out.println("B");
             System.out.println(move.getStartPosition().toString() + " " + move.getEndPosition().toString());
-            undoMove(move,movingPiece);
+            undoMove(move,replacingPiece);
             throw new InvalidMoveException("Invalid move: " + move);
         }
         System.out.println("After move");
         System.out.println(board.toString());
+        // switch turns
         if(getTeamTurn()==TeamColor.WHITE)
             setTeamTurn(TeamColor.BLACK);
         else
@@ -132,10 +138,6 @@ public class ChessGame {
     public void undoMove(ChessMove move, ChessPiece replacingPiece) {
         board.addPiece(move.getStartPosition(), board.getPiece(move.getEndPosition()));
         board.addPiece(move.getEndPosition(), replacingPiece);
-        if(getTeamTurn()==TeamColor.WHITE)
-            setTeamTurn(TeamColor.BLACK);
-        else
-            setTeamTurn(TeamColor.WHITE);
     }
     /**
      * Determines if the given team is in check
@@ -214,7 +216,25 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+//        ChessPiece king = new ChessPiece(teamColor, ChessPiece.PieceType.KING); // king of teamColor
+//        ChessPiece checkingPiece;
+//        ChessPosition kingPosition;
+//        boolean found = false;
+//        // find the king
+//        for(int row = 1; row < 9; row++) {
+//            if(found)
+//                break;
+//            for(int col = 1; col < 9; col++) {
+//                kingPosition = new ChessPosition(row, col);
+//                checkingPiece = board.getPiece(kingPosition);
+//                if(checkingPiece.equals(king)) { // found the king
+//                    found = true;
+//                    break;
+//                }
+//            }
+//        }
+//        if(validMoves(kingPosition).isEmpty())
+            return true;
     }
 
     /**
