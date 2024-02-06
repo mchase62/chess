@@ -78,7 +78,6 @@ public class ChessGame {
 
         // get all moves
         Collection<ChessMove> chessMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
-        System.out.println(board.getPiece(startPosition).getPieceType());
         ArrayList<ChessMove> movesToRemove = new ArrayList<>();
         movingPiece = board.getPiece(startPosition);
 
@@ -135,9 +134,6 @@ public class ChessGame {
         }
         // switch turns
         switchTurns();
-        System.out.println(movingPiece.getPieceType());
-        System.out.println(move.toString());
-        System.out.println(move.getPromotionPiece());
     }
 
     public void undoMove(ChessMove move, ChessPiece replacingPiece) {
@@ -198,10 +194,10 @@ public class ChessGame {
                         for( ChessMove move : checkingMoves) { // go through the piece moves and see if still in check
                             try { // make the move
                                 makeMove(move);  // try making the move
+                                undoMove(move, checkingPiece);
+                                switchTurns();
                             } catch (InvalidMoveException e) { // if move leaves king in check
                                 isChecked = true;
-                            } finally { // Always undo the move, whether it's valid or not
-                                undoMove(move, checkingPiece);
                             }
                             if (!isChecked) // if not in check
                                 return false;
