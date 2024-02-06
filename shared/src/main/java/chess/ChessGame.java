@@ -113,15 +113,18 @@ public class ChessGame {
         // make move
         ChessPiece movingPiece = board.getPiece(move.getStartPosition()); // copy the piece
         ChessPiece replacingPiece = board.getPiece(move.getEndPosition()); // copy the piece at end position
-        if(movingPiece != null)
+        if(movingPiece != null) // if moving piece exists, get all the moves
             moves = movingPiece.pieceMoves(board,move.getStartPosition());
         else
             moves = null;
+        if(move.getPromotionPiece()!=null) {
+            movingPiece = new ChessPiece(getTeamTurn(), move.getPromotionPiece());
+        }
         board.addPiece(move.getStartPosition(), null); // make its old location null
         board.addPiece(move.getEndPosition(), movingPiece); // move it to the new spot
         // throw exception if piece can't move there, if move leaves king in danger, or not your turn
-        if (movingPiece!=null) {
-        }
+//        if (movingPiece!=null) {
+//        }
         if (movingPiece == null || isInCheck(movingPiece.getTeamColor()) || !getTeamTurn().equals(movingPiece.getTeamColor())) {// see if the king is now in danger
             undoMove(move,replacingPiece);
             throw new InvalidMoveException("Invalid move: " + move);
@@ -132,6 +135,9 @@ public class ChessGame {
         }
         // switch turns
         switchTurns();
+        System.out.println(movingPiece.getPieceType());
+        System.out.println(move.toString());
+        System.out.println(move.getPromotionPiece());
     }
 
     public void undoMove(ChessMove move, ChessPiece replacingPiece) {
@@ -160,7 +166,7 @@ public class ChessGame {
                         for( ChessMove move : checkingMoves) { // go through the piece moves and see if there's a king at end position
                             if (board.getPiece(move.getEndPosition()) != null && board.getPiece(move.getEndPosition()).equals(king)) // if there's a king
                                 return true;
-                            }
+                        }
                     }
                 }
             }
