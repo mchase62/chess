@@ -16,17 +16,15 @@ public class ChessGame {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessGame chessGame = (ChessGame) o;
-        return Objects.deepEquals(board, chessGame.board) && teamTurn == chessGame.teamTurn && Objects.equals(lastStartPosition, chessGame.lastStartPosition) && Objects.equals(lastEndPosition, chessGame.lastEndPosition) && lastPromotionPiece == chessGame.lastPromotionPiece;
+        return Objects.deepEquals(board, chessGame.board) && teamTurn == chessGame.teamTurn && lastPromotionPiece == chessGame.lastPromotionPiece;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board, teamTurn, lastStartPosition, lastEndPosition, lastPromotionPiece);
+        return Objects.hash(board, teamTurn, lastPromotionPiece);
     }
 
     private TeamColor teamTurn;
-    private ChessPosition lastStartPosition;
-    private ChessPosition lastEndPosition;
     ChessPiece.PieceType lastPromotionPiece;
 
     public ChessGame() {
@@ -92,7 +90,6 @@ public class ChessGame {
                 switchTurns();
 
             } catch (InvalidMoveException e) {
-                System.out.println(move.toString());
                 movesToRemove.add(move);
             }
         }
@@ -220,7 +217,6 @@ public class ChessGame {
         ChessPiece king = new ChessPiece(teamColor, ChessPiece.PieceType.KING); // king of teamColor
         ChessPiece checkingPiece;
         ChessPosition kingPosition = new ChessPosition(1,1);
-        boolean found = false;
 
         // find the king
         outerLoop:
