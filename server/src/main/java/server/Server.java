@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
+import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryUserDAO;
 import handler.ClearHandler;
 import handler.UserHandler;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 
 public class Server {
     private final ClearService clearService = new ClearService();
-    private final UserService userService = new UserService(new MemoryUserDAO());
+    private final UserService userService = new UserService(new MemoryUserDAO(), new MemoryAuthDAO());
     public Server() {
     }
 

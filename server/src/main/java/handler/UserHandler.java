@@ -2,6 +2,7 @@ package handler;
 
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
+import model.AuthData;
 import service.UserService;
 import spark.Request;
 import spark.Response;
@@ -27,8 +28,9 @@ public class UserHandler {
             }
             userService.createUser(user);
             UserData createdUser = userService.getUser(user.username());
+            AuthData auth = userService.createAuth(user.username());
             response.status(200); // code was successful
-            return gson.toJson(new SuccessResponse(createdUser.username(), userService.createAuth(createdUser.username())));
+            return gson.toJson(new SuccessResponse(createdUser.username(), auth.authToken()));
         } catch (DataAccessException e) {
             response.status(500);
             return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));

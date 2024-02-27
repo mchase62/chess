@@ -9,9 +9,11 @@ import java.util.UUID;
 
 public class UserService {
     private final UserDAO userDAO;
+    private final AuthDAO authDAO;
 
-    public UserService(UserDAO userDAO) {
+    public UserService(UserDAO userDAO, AuthDAO authDAO) {
         this.userDAO = userDAO;
+        this.authDAO = authDAO;
     }
 
     public void createUser(UserData user) throws DataAccessException {
@@ -22,7 +24,7 @@ public class UserService {
         return userDAO.getUser(username);
     }
 
-    public String createAuth(String username) throws DataAccessException {
-        return UUID.randomUUID().toString();
+    public AuthData createAuth(String username) throws DataAccessException {
+        return authDAO.createAuth(username);
     }
 }
