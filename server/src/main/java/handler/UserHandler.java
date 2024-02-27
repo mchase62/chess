@@ -18,8 +18,9 @@ public class UserHandler {
         try {
             UserData user = gson.fromJson(request.body(), UserData.class);
             userService.createUser(user);
+            UserData createdUser = userService.getUser(user.username());
             response.status(200);
-            return "User registered successfully";
+            return gson.toJson(new SuccessResponse(createdUser.username(), userService.createAuth(createdUser.username())));
         } catch (DataAccessException e) {
             response.status(500);
             return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));
