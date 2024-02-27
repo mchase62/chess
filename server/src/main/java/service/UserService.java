@@ -4,13 +4,14 @@ import dataAccess.UserDAO;
 import model.UserData;
 
 public class UserService {
-    private final UserDAO userDao;
+    private final UserDAO userDAO;
 
-    public UserService(UserDAO userDao) {
-        this.userDao = userDao;
+    public UserService(UserDAO userDAO) {
+        this.userDAO = userDAO;
     }
 
-    public UserData register(UserData user) throws DataAccessException {
-        return userDao.register(user);
+    public void createUser(UserData user) throws DataAccessException {
+        userDAO.createUser(user);
     }
+
 }

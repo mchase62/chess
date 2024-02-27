@@ -2,7 +2,9 @@ package server;
 
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
-import dataAccess.UserDAO;
+import dataAccess.MemoryUserDAO;
+import handler.ClearHandler;
+import handler.UserHandler;
 import service.UserService;
 import spark.*;
 import service.ClearService;
@@ -12,8 +14,7 @@ import java.util.ArrayList;
 
 public class Server {
     private final ClearService clearService = new ClearService();
-    private final UserService userService = new UserService();
-    private ArrayList<UserData> users = new ArrayList<>();
+    private final UserService userService = new UserService(new MemoryUserDAO());
     public Server() {
     }
 
@@ -25,7 +26,7 @@ public class Server {
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", (req, res) -> new ClearHandler().clear(req, res));
-        Spark.post("/user", (req, res) -> new UserHandler().register(req, res));
+        Spark.post("/user", (req, res) -> new UserHandler(userService).handleRegister(req, res));
         Spark.awaitInitialization();
         return Spark.port();
     }
@@ -46,8 +47,7 @@ public class Server {
 
     private Object register(Request req, Response res) throws DataAccessException {
         var user = new Gson().fromJson(req.body(), UserData.class);
-        user = userService.register(user);
-        users.add(user);
+        userService.createUser(user);
         return new Gson().toJson(user);
     }
 

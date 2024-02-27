@@ -1,4 +1,4 @@
-package server;
+package handler;
 import service.ClearService;
 import spark.*;
 import com.google.gson.Gson;
