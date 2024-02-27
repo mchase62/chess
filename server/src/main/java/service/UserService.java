@@ -27,4 +27,12 @@ public class UserService {
     public AuthData createAuth(String username) throws DataAccessException {
         return authDAO.createAuth(username);
     }
+
+    public AuthData login(String username, String password) throws DataAccessException {
+        String userPassword = userDAO.getPassword(username);
+        if (password.equals(userPassword)) {
+            return authDAO.createAuth(username);
+        }
+        return null;
+    }
 }

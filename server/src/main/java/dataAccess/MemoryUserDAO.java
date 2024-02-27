@@ -23,4 +23,14 @@ public class MemoryUserDAO implements UserDAO{
     public void clear() {
         usersByUsername.clear(); // clear the map
     }
+
+    @Override
+    public String getPassword(String username) {
+        if(usersByUsername.containsKey(username)) { // if the user exists
+            return usersByUsername.get(username).password(); // return the password
+        }
+        else { // return null if user does not exist
+            return null;
+        }
+    }
 }

@@ -36,4 +36,23 @@ public class UserHandler {
             return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));
         }
     }
+
+    public String handleLogin(Request request, Response response) {
+        try {
+            UserData user = gson.fromJson(request.body(), UserData.class);
+            AuthData auth = userService.login(user.username(), user.password());
+            if (auth == null) {
+                response.status(401);
+                return gson.toJson(new ErrorResponse("Error: unauthorized", "Error: unauthorized"));
+            }
+            else {
+                response.status(200); // code was successful
+                return gson.toJson(new SuccessResponse(user.username(), auth.authToken()));
+            }
+        }
+        catch (DataAccessException e) {
+            response.status(500);
+            return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));
+        }
+    }
 }
