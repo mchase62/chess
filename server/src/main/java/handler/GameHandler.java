@@ -78,6 +78,10 @@ public class GameHandler {
                 response.status(403);
                 return gson.toJson(new ErrorResponse("Error: " + status, "Error: " + status));
             }
+            else if (status.equals("bad request")) {
+                response.status(400);
+                return gson.toJson(new ErrorResponse("Error: " + status, "Error: " + status));
+            }
 
             return "";
         }

@@ -41,13 +41,15 @@ public class MemoryGameDAO implements GameDAO {
 
     public String updateGame(String username, String playerColor, int gameID) {
         GameData gameData = gamesByID.get(gameID); // get the game data object
+        if (gameData==null) // bad game id
+            return "bad request";
         String white = gameData.whiteUsername();
         String black = gameData.blackUsername();
         if (playerColor.equals("white") && white.isEmpty()) // if player chose white and it's not taken
             white = username;
         else if (playerColor.equals("black") && black.isEmpty()) // if player chose black and it's not taken
             black = username;
-        else
+        else // both are taken
             return "already taken";
         GameData updatedGameData = new GameData(gameID, white, black, gameData.gameName(),gameData.game()); // create updated game
         gamesByID.put(gameID, updatedGameData);
