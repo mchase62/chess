@@ -6,7 +6,9 @@ import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
 import handler.ClearHandler;
+import handler.GameHandler;
 import handler.UserHandler;
+import service.GameService;
 import service.UserService;
 import spark.*;
 import service.ClearService;
@@ -17,7 +19,7 @@ import java.util.ArrayList;
 public class Server {
     private final ClearService clearService = new ClearService();
     private final UserService userService = new UserService();
-//    private final GameService gameService = new GameService();
+    private final GameService gameService = new GameService();
     public Server() {
     }
 
@@ -32,7 +34,7 @@ public class Server {
         Spark.post("/user", (req, res) -> new UserHandler(userService).handleRegister(req, res));
         Spark.post("/session", (req, res) -> new UserHandler(userService).handleLogin(req, res));
         Spark.delete("/session", (req, res) -> new UserHandler(userService).handleLogout(req, res));
-//        Spark.post("/game", (req, res) -> new GameHandler())
+        Spark.post("/game", (req, res) -> new GameHandler(gameService).handleNewGame(req, res));
         Spark.awaitInitialization();
         return Spark.port();
     }

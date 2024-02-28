@@ -30,7 +30,7 @@ public class UserHandler {
             UserData createdUser = userService.getUser(user.username());
             AuthData auth = userService.createAuth(user.username());
             response.status(200); // code was successful
-            return gson.toJson(new SuccessResponse(createdUser.username(), auth.authToken()));
+            return gson.toJson(new UserResponse(createdUser.username(), auth.authToken()));
         } catch (DataAccessException e) {
             response.status(500);
             return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));
@@ -47,7 +47,7 @@ public class UserHandler {
             }
             else {
                 response.status(200); // code was successful
-                return gson.toJson(new SuccessResponse(user.username(), auth.authToken()));
+                return gson.toJson(new UserResponse(user.username(), auth.authToken()));
             }
         }
         catch (DataAccessException e) {
@@ -63,9 +63,7 @@ public class UserHandler {
         String status;
         try {
             status = userService.logout(auth);
-            System.out.println(status);
             if (status.equals("success")) {
-                System.out.println("BOP");
                 response.status(200);
                 return "";
             }
