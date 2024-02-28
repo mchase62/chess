@@ -55,4 +55,28 @@ public class UserHandler {
             return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));
         }
     }
+
+    public String handleLogout(Request request, Response response) {
+        String auth = request.headers("authorization");
+        System.out.println(request.body());
+        System.out.println(auth);
+        String status;
+        try {
+            status = userService.logout(auth);
+            System.out.println(status);
+            if (status.equals("success")) {
+                System.out.println("BOP");
+                response.status(200);
+                return "";
+            }
+            else {
+                response.status(401);
+                return gson.toJson(new ErrorResponse("Error: unauthorized", "Error: unauthorized"));
+            }
+        }
+        catch (DataAccessException e) {
+            response.status(500);
+            return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));
+        }
+    }
 }

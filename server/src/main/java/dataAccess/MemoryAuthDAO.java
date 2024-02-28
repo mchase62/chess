@@ -15,4 +15,17 @@ public class MemoryAuthDAO implements AuthDAO{
         usersByAuth.put(auth, username);
         return new AuthData(auth, username);
     }
+
+    @Override
+    public String deleteAuth(String auth) throws DataAccessException {
+        System.out.println(auth);
+        System.out.println(usersByAuth.containsKey(auth));
+        if(usersByAuth.containsKey(auth)) {
+            usersByAuth.remove(auth);
+            return "success";
+        }
+        else {
+            return "fail";
+        }
+    }
 }

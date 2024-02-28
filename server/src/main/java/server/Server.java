@@ -26,9 +26,11 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.delete("/db", (req, res) -> new ClearHandler().clear(req, res));
+        Spark.delete("/db", (req, res) -> new ClearHandler(clearService).handleClear(req, res));
         Spark.post("/user", (req, res) -> new UserHandler(userService).handleRegister(req, res));
         Spark.post("/session", (req, res) -> new UserHandler(userService).handleLogin(req, res));
+        Spark.delete("/session", (req, res) -> new UserHandler(userService).handleLogout(req, res));
+//        Spark.post("/game", (req, res) -> new GameHandler())
         Spark.awaitInitialization();
         return Spark.port();
     }

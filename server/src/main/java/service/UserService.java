@@ -35,4 +35,9 @@ public class UserService {
         }
         return null;
     }
+
+    public String logout(String auth) throws DataAccessException {
+        System.out.println(auth);
+        return authDAO.deleteAuth(auth);
+    }
 }
