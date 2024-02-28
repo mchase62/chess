@@ -55,6 +55,9 @@ public class MemoryGameDAO implements GameDAO {
             return "bad request";
         String white = gameData.whiteUsername();
         String black = gameData.blackUsername();
+        if (playerColor == null) {
+            return "success";
+        }
         if (playerColor.equals("WHITE") && white == null) // if player chose white and it's not taken
             white = username;
         else if (playerColor.equals("BLACK") && black == null) // if player chose black and it's not taken
