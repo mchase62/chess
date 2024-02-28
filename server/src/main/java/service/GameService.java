@@ -21,7 +21,7 @@ public class GameService {
         return gameDAO.listGames();
     }
 
-    public String joinGame(String playerColor, int gameID) throws DataAccessException {
-        return gameDAO.updateGame(playerColor, gameID);
+    public String joinGame(String username, String playerColor, int gameID) throws DataAccessException {
+        return gameDAO.updateGame(username, playerColor, gameID);
     }
 }

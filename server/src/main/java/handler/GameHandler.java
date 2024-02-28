@@ -63,13 +63,22 @@ public class GameHandler {
 
     public String handleJoinGame(Request request, Response response) {
         try {
+            String status;
             String auth = request.headers("Authorization"); // get auth token
+            String username = MemoryAuthDAO.getInstance().getUser(auth);
+            if (username==null) { // if the user is not authorized
+                response.status(401);
+                status = "unauthorized";
+                return gson.toJson(new ErrorResponse("Error: " + status, "Error: " + status));
+            }
             GameRequest gameRequest= gson.fromJson(request.body(), GameRequest.class);
-            String status = gameService.joinGame(gameRequest.getPlayerColor(), gameRequest.getGameID());
+            status = gameService.joinGame(username, gameRequest.getPlayerColor(), gameRequest.getGameID());
+
             if(status.equals("already taken")) {
                 response.status(403);
                 return gson.toJson(new ErrorResponse("Error: " + status, "Error: " + status));
             }
+
             return "";
         }
         catch (DataAccessException e) {
