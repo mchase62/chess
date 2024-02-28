@@ -1,7 +1,5 @@
 package service;
-import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
-import dataAccess.UserDAO;
+import dataAccess.*;
 import model.AuthData;
 import model.UserData;
 
@@ -11,9 +9,9 @@ public class UserService {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
-    public UserService(UserDAO userDAO, AuthDAO authDAO) {
-        this.userDAO = userDAO;
-        this.authDAO = authDAO;
+    public UserService() {
+        userDAO = MemoryUserDAO.getInstance();
+        authDAO = MemoryAuthDAO.getInstance();
     }
 
     public void createUser(UserData user) throws DataAccessException {

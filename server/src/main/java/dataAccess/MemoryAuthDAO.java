@@ -9,6 +9,14 @@ import java.util.UUID;
 
 public class MemoryAuthDAO implements AuthDAO{
     private final Map<String, String> usersByAuth = new HashMap<>();
+    private static MemoryAuthDAO instance = null;
+
+    public static synchronized MemoryAuthDAO getInstance() {
+        if(instance == null) {
+            instance = new MemoryAuthDAO();
+        }
+        return instance;
+    }
     @Override
     public AuthData createAuth(String username) throws DataAccessException {
         String auth = UUID.randomUUID().toString();
