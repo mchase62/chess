@@ -12,10 +12,13 @@ import spark.Request;
 import spark.Response;
 import model.GameData;
 
+import java.util.List;
+import java.util.Map;
+
 public class GameHandler {
-    private GameService gameService;
+    private final GameService gameService;
     private final Gson gson = new Gson();
-    private AuthDAO authDAO = MemoryAuthDAO.getInstance();
+    private final AuthDAO authDAO = MemoryAuthDAO.getInstance();
 
     public GameHandler(GameService gameService) {
         this.gameService = gameService;
@@ -23,9 +26,8 @@ public class GameHandler {
 
     public String handleNewGame(Request request, Response response) {
         try {
-            GameData game = gson.fromJson(request.body(), GameData.class);
-            System.out.println(request.body());
-            String auth = request.headers("Authorization");
+            GameData game = gson.fromJson(request.body(), GameData.class); // get game name
+            String auth = request.headers("Authorization"); // get auth token
             if(game.gameName() == null) {
                 response.status(400);
                 return gson.toJson(new ErrorResponse("Error: bad request","Error: bad request"));
@@ -40,6 +42,54 @@ public class GameHandler {
         } catch (DataAccessException e) {
             response.status(500);
             return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));
+        }
+    }
+
+    public String handleListGames(Request request, Response response) {
+        try {
+            String auth = request.headers("Authorization"); // get auth token
+            if (authDAO.getUser(auth) == null) { // auth token doesn't exist
+                response.status(401);
+                return gson.toJson(new ErrorResponse("Error: unauthorized", "Error: unauthorized"));
+            }
+            Map<Integer, GameData> gamesMap = gameService.listGames();
+            return gson.toJson(new ListGamesResponse(gamesMap));
+        }
+        catch (DataAccessException e) {
+            response.status(500);
+            return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));
+        }
+    }
+
+    public String handleJoinGame(Request request, Response response) {
+        try {
+            String auth = request.headers("Authorization"); // get auth token
+            GameRequest gameRequest= gson.fromJson(request.body(), GameRequest.class);
+            String status = gameService.joinGame(gameRequest.getPlayerColor(), gameRequest.getGameID());
+            if(status.equals("already taken")) {
+                response.status(403);
+                return gson.toJson(new ErrorResponse("Error: " + status, "Error: " + status));
+            }
+            return "";
+        }
+        catch (DataAccessException e) {
+            response.status(500);
+            return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));
+        }
+    }
+
+    public static class GameRequest {
+        private final String playerColor;
+        private final int gameID;
+        public GameRequest(String playerColor, int gameID) {
+            this.playerColor = playerColor;
+            this.gameID = gameID;
+        }
+        public String getPlayerColor() {
+            return playerColor;
+        }
+        public int getGameID() {
+            return gameID;
         }
     }
 }

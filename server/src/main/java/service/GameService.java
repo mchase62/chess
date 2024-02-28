@@ -1,6 +1,10 @@
 package service;
 
 import dataAccess.*;
+import model.GameData;
+
+import java.util.List;
+import java.util.Map;
 
 public class GameService {
     private final GameDAO gameDAO;
@@ -11,5 +15,13 @@ public class GameService {
 
     public int createGame(String gameName) throws DataAccessException {
         return gameDAO.createGame(gameName);
+    }
+
+    public Map<Integer, GameData> listGames() throws DataAccessException {
+        return gameDAO.listGames();
+    }
+
+    public String joinGame(String playerColor, int gameID) throws DataAccessException {
+        return gameDAO.updateGame(playerColor, gameID);
     }
 }
