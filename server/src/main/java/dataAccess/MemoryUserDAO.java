@@ -3,6 +3,7 @@ package dataAccess;
 
 import model.UserData;
 
+import javax.xml.crypto.Data;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,5 +40,10 @@ public class MemoryUserDAO implements UserDAO{
         else { // return null if user does not exist
             return null;
         }
+    }
+
+    @Override
+    public Map<String, UserData> getUsers() throws DataAccessException {
+        return usersByUsername;
     }
 }
