@@ -42,8 +42,8 @@ public class MemoryGameDAO implements GameDAO {
         Collection<ListGamesResponse.game> gamesList = new HashSet<>();
 
         for (Map.Entry<Integer, GameData> entry : gamesByID.entrySet()) { // loop through games and convert to list
-            ListGamesResponse.game game = new ListGamesResponse.game(entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername());
-            gamesList.add(game);
+            ListGamesResponse.game gameItem = new ListGamesResponse.game(entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername());
+            gamesList.add(gameItem);
         }
         return gamesList;
     }

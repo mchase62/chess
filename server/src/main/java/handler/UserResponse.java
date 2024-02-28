@@ -10,12 +10,4 @@ public class UserResponse extends HandlerResponse {
         this.authToken = authToken;
     }
 
-    // Add getters for username and authToken
-    public String getUsername() {
-        return username;
-    }
-
-    public String getAuthToken() {
-        return authToken;
-    }
 }

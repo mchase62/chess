@@ -59,14 +59,6 @@ public class ChessPiece {
         return type;
     }
 
-    /**
-     *
-     * @param newType for a promoted pawn
-     */
-    public void setPieceType(PieceType newType) {
-        this.type = newType;
-    }
-
     public HashSet<ChessMove> pawnMoves(ChessPosition myPosition, ChessBoard board, HashSet<ChessMove> chessMoves, int row, int col, PieceType promotionPiece) {
         ChessPosition endPosition;
         if ((myPosition.getRow() != 7 && getTeamColor() == ChessGame.TeamColor.WHITE) || (myPosition.getRow() != 2 && getTeamColor() == ChessGame.TeamColor.BLACK)) // if not the last row, can't promote

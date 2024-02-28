@@ -9,13 +9,4 @@ public class ErrorResponse extends HandlerResponse {
         this.error = error;
         this.message = message;
     }
-
-    // Add getters for error and message
-    public String getMessage() {
-        return message;
-    }
-
-    public String getError() {
-        return error;
-    }
 }

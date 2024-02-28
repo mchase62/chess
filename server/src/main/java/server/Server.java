@@ -45,20 +45,4 @@ public class Server {
         Spark.stop();
         Spark.awaitStop();
     }
-
-    public int port() {
-        return Spark.port();
-    }
-
-    private Object clear(Request req, Response res) throws DataAccessException {
-        clearService.clearData();
-        return "";
-    }
-
-    private Object register(Request req, Response res) throws DataAccessException {
-        var user = new Gson().fromJson(req.body(), UserData.class);
-        userService.createUser(user);
-        return new Gson().toJson(user);
-    }
-
 }
