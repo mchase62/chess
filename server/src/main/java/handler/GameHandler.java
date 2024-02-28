@@ -7,13 +7,13 @@ import dataAccess.DataAccessException;
 import dataAccess.MemoryAuthDAO;
 import model.AuthData;
 import model.UserData;
+import passoffTests.testClasses.TestModels;
 import service.GameService;
 import spark.Request;
 import spark.Response;
 import model.GameData;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GameHandler {
     private final GameService gameService;
@@ -52,8 +52,9 @@ public class GameHandler {
                 response.status(401);
                 return gson.toJson(new ErrorResponse("Error: unauthorized", "Error: unauthorized"));
             }
-            Map<Integer, GameData> gamesMap = gameService.listGames();
-            return gson.toJson(new ListGamesResponse(gamesMap));
+            Collection<ArrayList<Object>> games = gameService.listGames();
+            System.out.println(gson.toJson(new ListGamesResponse(games)));
+            return gson.toJson(new ListGamesResponse(games));
         }
         catch (DataAccessException e) {
             response.status(500);
@@ -74,16 +75,19 @@ public class GameHandler {
             GameRequest gameRequest= gson.fromJson(request.body(), GameRequest.class);
             status = gameService.joinGame(username, gameRequest.getPlayerColor(), gameRequest.getGameID());
 
-            if(status.equals("already taken")) {
+            if(status.equals("already taken")) { // spot taken
                 response.status(403);
                 return gson.toJson(new ErrorResponse("Error: " + status, "Error: " + status));
             }
-            else if (status.equals("bad request")) {
+            else if (status.equals("bad request")) { // game id doesn't exist
                 response.status(400);
                 return gson.toJson(new ErrorResponse("Error: " + status, "Error: " + status));
             }
+            else { // request was successful
+                response.status(200);
+                return "";
+            }
 
-            return "";
         }
         catch (DataAccessException e) {
             response.status(500);

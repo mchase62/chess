@@ -2,13 +2,15 @@ package handler;
 
 import model.GameData;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 public class ListGamesResponse extends HandlerResponse{
-    private Map<Integer, GameData> gamesMap;
+    private Collection<ArrayList<Object>> games;
 
-    public ListGamesResponse(Map<Integer, GameData> gamesMap) {
+    public ListGamesResponse(Collection<ArrayList<Object>> games) {
         super(200);
-        this.gamesMap = gamesMap;
+        this.games = games;
     }
 }

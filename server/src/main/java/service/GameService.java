@@ -3,6 +3,8 @@ package service;
 import dataAccess.*;
 import model.GameData;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +19,7 @@ public class GameService {
         return gameDAO.createGame(gameName);
     }
 
-    public Map<Integer, GameData> listGames() throws DataAccessException {
+    public Collection<ArrayList<Object>> listGames() throws DataAccessException {
         return gameDAO.listGames();
     }
 
