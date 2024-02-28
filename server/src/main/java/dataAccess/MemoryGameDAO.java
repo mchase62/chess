@@ -38,11 +38,11 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public Collection<ListGamesResponse.gameItem> listGames() {
-        Collection<ListGamesResponse.gameItem> gamesList = new HashSet<>();
+    public Collection<ListGamesResponse.GameItem> listGames() {
+        Collection<ListGamesResponse.GameItem> gamesList = new HashSet<>();
 
         for (Map.Entry<Integer, GameData> entry : gamesByID.entrySet()) { // loop through games and convert to list
-            ListGamesResponse.gameItem gameItem = new ListGamesResponse.gameItem(entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername());
+            ListGamesResponse.GameItem gameItem = new ListGamesResponse.GameItem(entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername());
             gamesList.add(gameItem);
         }
         return gamesList;

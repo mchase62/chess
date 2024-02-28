@@ -7,19 +7,19 @@ import java.util.Collection;
 import java.util.Map;
 
 public class ListGamesResponse extends HandlerResponse{
-    private Collection<gameItem> games;
+    private Collection<GameItem> games;
 
-    public ListGamesResponse(Collection<gameItem> games) {
+    public ListGamesResponse(Collection<GameItem> games) {
         super(200);
         this.games = games;
     }
 
-    public static class gameItem {
+    public static class GameItem {
         private final int gameID;
         private final String whiteUsername;
         private final String blackUsername;
         private final String gameName;
-        public gameItem(int gameID, String gameName, String whiteUsername, String blackUsername) {
+        public GameItem(int gameID, String gameName, String whiteUsername, String blackUsername) {
             this.gameID = gameID;
             this.whiteUsername = whiteUsername;
             this.blackUsername = blackUsername;

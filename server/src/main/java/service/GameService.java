@@ -20,7 +20,7 @@ public class GameService {
         return gameDAO.createGame(gameName);
     }
 
-    public Collection<ListGamesResponse.gameItem> listGames() throws DataAccessException {
+    public Collection<ListGamesResponse.GameItem> listGames() throws DataAccessException {
         return gameDAO.listGames();
     }
 

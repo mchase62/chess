@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface GameDAO {
     public int createGame(String gameName) throws DataAccessException;
-    public Collection<ListGamesResponse.gameItem> listGames() throws DataAccessException;
+    public Collection<ListGamesResponse.GameItem> listGames() throws DataAccessException;
     public String updateGame(String username, String playerColor, int gameID) throws DataAccessException;
     public void clear() throws DataAccessException;
 }
