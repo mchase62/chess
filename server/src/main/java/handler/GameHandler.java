@@ -52,7 +52,7 @@ public class GameHandler {
                 response.status(401);
                 return gson.toJson(new ErrorResponse("Error: unauthorized", "Error: unauthorized"));
             }
-            Collection<ListGamesResponse.game> games = gameService.listGames();
+            Collection<ListGamesResponse.gameItem> games = gameService.listGames();
             System.out.println(gson.toJson(new ListGamesResponse(games)));
             return gson.toJson(new ListGamesResponse(games));
         }
