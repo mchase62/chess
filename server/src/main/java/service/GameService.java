@@ -1,6 +1,7 @@
 package service;
 
 import dataAccess.*;
+import handler.ListGamesResponse;
 import model.GameData;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class GameService {
         return gameDAO.createGame(gameName);
     }
 
-    public Collection<ArrayList<Object>> listGames() throws DataAccessException {
+    public Collection<ListGamesResponse.game> listGames() throws DataAccessException {
         return gameDAO.listGames();
     }
 

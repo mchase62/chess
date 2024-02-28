@@ -1,6 +1,7 @@
 package dataAccess;
 
 import chess.ChessGame;
+import handler.ListGamesResponse;
 import model.GameData;
 
 import java.util.*;
@@ -31,21 +32,17 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public int createGame(String gameName) {
         int gameID = newGameID();
-        GameData gameData = new GameData(gameID,"","", gameName, new ChessGame());
+        GameData gameData = new GameData(gameID,null,null, gameName, new ChessGame());
         gamesByID.put(gameID,gameData);
         return gameID;
     }
 
     @Override
-    public Collection<ArrayList<Object>> listGames() {
-        Collection<ArrayList<Object>> gamesList = new HashSet<>();
+    public Collection<ListGamesResponse.game> listGames() {
+        Collection<ListGamesResponse.game> gamesList = new HashSet<>();
 
         for (Map.Entry<Integer, GameData> entry : gamesByID.entrySet()) { // loop through games and convert to list
-            ArrayList<Object> game = new ArrayList<Object>();
-            game.add(entry.getKey());
-            game.add(entry.getValue().gameName());
-            game.add(entry.getValue().blackUsername());
-            game.add(entry.getValue().whiteUsername());
+            ListGamesResponse.game game = new ListGamesResponse.game(entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername());
             gamesList.add(game);
         }
         return gamesList;
@@ -58,9 +55,9 @@ public class MemoryGameDAO implements GameDAO {
             return "bad request";
         String white = gameData.whiteUsername();
         String black = gameData.blackUsername();
-        if (playerColor.equals("WHITE") && white.isEmpty()) // if player chose white and it's not taken
+        if (playerColor.equals("WHITE") && white == null) // if player chose white and it's not taken
             white = username;
-        else if (playerColor.equals("BLACK") && black.isEmpty()) // if player chose black and it's not taken
+        else if (playerColor.equals("BLACK") && black == null) // if player chose black and it's not taken
             black = username;
         else // both are taken
             return "already taken";
