@@ -58,8 +58,6 @@ public class UserHandler {
 
     public String handleLogout(Request request, Response response) {
         String auth = request.headers("authorization");
-        System.out.println(request.body());
-        System.out.println(auth);
         String status;
         try {
             status = userService.logout(auth);

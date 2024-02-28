@@ -26,8 +26,6 @@ public class MemoryAuthDAO implements AuthDAO{
 
     @Override
     public String deleteAuth(String auth) throws DataAccessException {
-        System.out.println(auth);
-        System.out.println(usersByAuth.containsKey(auth));
         if(usersByAuth.containsKey(auth)) {
             usersByAuth.remove(auth);
             return "success";
@@ -35,5 +33,10 @@ public class MemoryAuthDAO implements AuthDAO{
         else {
             return "fail";
         }
+    }
+
+    @Override
+    public String getUser(String auth) throws DataAccessException {
+        return usersByAuth.getOrDefault(auth, null);
     }
 }
