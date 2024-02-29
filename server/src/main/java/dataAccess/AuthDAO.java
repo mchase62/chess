@@ -10,5 +10,4 @@ public interface AuthDAO {
     public String getUser(String auth) throws DataAccessException;
     public String deleteAuth(String auth) throws DataAccessException;
     public void clear() throws DataAccessException;
-    public Map<String, String> getUsersByAuth() throws DataAccessException;
 }

@@ -41,9 +41,4 @@ public class MemoryUserDAO implements UserDAO{
             return null;
         }
     }
-
-    @Override
-    public Map<String, UserData> getUsers() throws DataAccessException {
-        return usersByUsername;
-    }
 }
