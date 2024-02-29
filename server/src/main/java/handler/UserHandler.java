@@ -22,11 +22,11 @@ public class UserHandler {
                 response.status(400);
                 return gson.toJson(new ErrorResponse("Error: bad request","Error: bad request"));
             }
-            if (userService.getUser(user.username()) != null) {
+            String status = userService.createUser(user);
+            if (status.equals("Fail")) { // user already exists
                 response.status(403);
                 return gson.toJson(new ErrorResponse("Error: already taken","Error: already taken"));
             }
-            userService.createUser(user);
             UserData createdUser = userService.getUser(user.username());
             AuthData auth = userService.createAuth(user.username());
             response.status(200); // code was successful

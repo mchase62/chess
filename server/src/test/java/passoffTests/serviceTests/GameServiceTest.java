@@ -1,4 +1,4 @@
 package passoffTests.serviceTests;
 
-public class LoginServiceTest {
+public class GameServiceTest {
 }

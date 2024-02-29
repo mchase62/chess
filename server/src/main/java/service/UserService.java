@@ -14,8 +14,8 @@ public class UserService {
         authDAO = MemoryAuthDAO.getInstance();
     }
 
-    public void createUser(UserData user) throws DataAccessException {
-        userDAO.createUser(user);
+    public String createUser(UserData user) throws DataAccessException {
+        return userDAO.createUser(user);
     }
 
     public UserData getUser(String username) throws DataAccessException {

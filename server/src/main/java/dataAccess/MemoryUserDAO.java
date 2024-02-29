@@ -18,8 +18,12 @@ public class MemoryUserDAO implements UserDAO{
         return instance;
     }
     @Override
-    public void createUser(UserData user) {
+    public String createUser(UserData user) {
+        if(usersByUsername.containsKey(user.username())) { // user already exists
+            return "Fail";
+        }
         usersByUsername.put(user.username(), user); // put user in map
+        return "Success";
     }
 
     @Override
