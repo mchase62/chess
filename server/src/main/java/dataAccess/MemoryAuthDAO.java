@@ -20,6 +20,9 @@ public class MemoryAuthDAO implements AuthDAO{
     @Override
     public AuthData createAuth(String username) throws DataAccessException {
         String auth = UUID.randomUUID().toString();
+        if(MemoryUserDAO.getInstance().getUser(username)==null) { // user doesn't exist
+            return null;
+        }
         usersByAuth.put(auth, username);
         return new AuthData(auth, username);
     }

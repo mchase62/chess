@@ -28,7 +28,10 @@ public class MemoryUserDAO implements UserDAO{
 
     @Override
     public UserData getUser(String username) {
-        return usersByUsername.get(username); // get user from map
+        if(usersByUsername.containsKey(username)) { // if user exists
+            return usersByUsername.get(username); // get user from map
+        }
+        return null; // return null if user doesn't exist
     }
 
     @Override
