@@ -19,6 +19,7 @@ public class ClearServiceTest {
 
         // fill data
         UserData user = new UserData("testUsername", "testPassword", "testEmail");
+        userDAO.createUser(user);
         gameDAO.createGame("gameName");
         AuthData auth = authDAO.createAuth(user.username());
 

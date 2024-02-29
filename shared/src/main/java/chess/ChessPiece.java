@@ -225,4 +225,8 @@ public class ChessPiece {
         }
         return chessMoves;
     }
+
+    public ChessPosition createPosition(int row, int col) {
+        return new ChessPosition(row, col);
+    }
 }

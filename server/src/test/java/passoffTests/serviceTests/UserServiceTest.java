@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTest {
     static final UserService userService = new UserService();
+
     private MemoryUserDAO userDAO;
     private MemoryAuthDAO authDAO;
 

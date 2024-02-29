@@ -31,6 +31,8 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public int createGame(String gameName) {
+        if(gameName.isEmpty())
+            return 0;
         int gameID = newGameID();
         GameData gameData = new GameData(gameID,null,null, gameName, new ChessGame());
         gamesByID.put(gameID,gameData);
