@@ -142,13 +142,15 @@ public class ChessPiece {
             // find the board limit conditions
             if(rowDirection == 1 && colDirection == 0)
                 condition = myPosition.getRow() + i < 9;
-            else if(rowDirection == -1 && colDirection == 0)
+            else if(rowDirection == - 1 && colDirection == 0)
                 condition = myPosition.getRow() - i > 0;
             else if(colDirection == 1)
                 condition = myPosition.getColumn() + i < 9;
             else
                 condition = myPosition.getColumn() - i > 0;
+            System.out.print("");
             if (condition) {
+                System.out.print("");
                 endPosition = new ChessPosition(myPosition.getRow()+(i*rowDirection), myPosition.getColumn()+(i*colDirection));
 
                 if(board.getPiece(endPosition) == null) // empty space
@@ -224,9 +226,5 @@ public class ChessPiece {
             chessMoves = rookMoves(myPosition, board, chessMoves,0,-1);
         }
         return chessMoves;
-    }
-
-    public ChessPosition createPosition(int row, int col) {
-        return new ChessPosition(row, col);
     }
 }
