@@ -8,3 +8,6 @@ out/
 
 ### Mac OS ###
 .DS_Store
+
+# Ignore database connection files
+server/src/main/resources/db.properties
