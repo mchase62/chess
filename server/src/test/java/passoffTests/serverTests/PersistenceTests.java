@@ -95,13 +95,18 @@ public class PersistenceTests {
             Class<?> clazz = Class.forName("dataAccess.DatabaseManager");
             Method getConnectionMethod = clazz.getDeclaredMethod("getConnection");
             getConnectionMethod.setAccessible(true);
-
+            System.out.println("I'm here");
             Object obj = clazz.getDeclaredConstructor().newInstance();
+            System.out.println("AA");
             try (Connection conn = (Connection) getConnectionMethod.invoke(obj);) {
+                System.out.println("A");
                 try (var statement = conn.createStatement()) {
+                    System.out.println("B");
                     for (String table : getTables(conn)) {
+                        System.out.println("C");
                         var sql = "SELECT count(*) FROM " + table;
                         try (var resultSet = statement.executeQuery(sql)) {
+                            System.out.println("D");
                             if (resultSet.next()) {
                                 rows += resultSet.getInt(1);
                             }

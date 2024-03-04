@@ -14,17 +14,20 @@ public class DatabaseManager {
      */
     static {
         try {
+            System.out.println("TRYING");
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
                 if (propStream == null) throw new Exception("Unable to load db.properties");
                 Properties props = new Properties();
                 props.load(propStream);
                 databaseName = props.getProperty("db.name");
                 user = props.getProperty("db.user");
+                System.out.println(user);
                 password = props.getProperty("db.password");
-
+                System.out.println(password);
                 var host = props.getProperty("db.host");
                 var port = Integer.parseInt(props.getProperty("db.port"));
                 connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
+                System.out.println(connectionUrl);
             }
         } catch (Exception ex) {
             throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
