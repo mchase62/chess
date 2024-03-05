@@ -39,6 +39,7 @@ public class DatabaseManager {
      */
     static void createDatabase() throws DataAccessException {
         try {
+            System.out.println("Creating");
             var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
             var conn = DriverManager.getConnection(connectionUrl, user, password);
             try (var preparedStatement = conn.prepareStatement(statement)) {
@@ -63,8 +64,15 @@ public class DatabaseManager {
      */
     static Connection getConnection() throws DataAccessException {
         try {
+            System.out.println("BB");
+            System.out.println(connectionUrl);
+            System.out.println(user);
+            System.out.println(password);
             var conn = DriverManager.getConnection(connectionUrl, user, password);
+            System.out.println("CC");
+            System.out.println(databaseName);
             conn.setCatalog(databaseName);
+            System.out.println("DD");
             return conn;
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
