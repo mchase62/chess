@@ -16,7 +16,14 @@ public class SQLUserDAO implements UserDAO{
     }
     @Override
     public void clear() throws DataAccessException {
-//        usersByUsername.clear()
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "DELETE FROM user";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.execute();
+            }
+        }catch (Exception e) {
+            throw new DataAccessException("Unable to get user");
+        }
     }
 
     @Override
@@ -44,12 +51,14 @@ public class SQLUserDAO implements UserDAO{
                     if (rs.next()) {
                         return new UserData(rs.getString("username"),rs.getString("password"),rs.getString("email"));
                     }
+                    else {
+                        return null;
+                    }
                 }
             }
         }catch (Exception e) {
             throw new DataAccessException("Unable to get user");
         }
-        return null; // if the user doesn't exist
     }
 
     @Override
@@ -99,7 +108,6 @@ public class SQLUserDAO implements UserDAO{
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
-                System.out.println(statement);
                 for (var i = 0; i < params.length; i++) {
                     var param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);

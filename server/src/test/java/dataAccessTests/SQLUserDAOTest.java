@@ -4,6 +4,9 @@ import dataAccess.DataAccessException;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.*;
 import model.UserData;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -19,10 +22,13 @@ public class SQLUserDAOTest {
         } else {
             userDAO = new MemoryUserDAO();
         }
-        userDAO.clear();
         return userDAO;
     }
-
+    @AfterEach
+    public void cleanUp() throws DataAccessException {
+        UserDAO userDAO = getUserDAO(SQLUserDAO.class);
+        userDAO.clear();
+    }
     @ParameterizedTest
     @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class})
     void createUserTestSuccess(Class<? extends UserDAO> userDAOClass) throws DataAccessException {
@@ -93,4 +99,17 @@ public class SQLUserDAOTest {
         assertNull(hashedPassword);
     }
 
+    @ParameterizedTest
+    @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class})
+    void clearTest(Class<? extends UserDAO> userDAOClass) throws DataAccessException {
+        UserDAO userDAO = getUserDAO(userDAOClass);
+
+        var user = new UserData("clear_username", "new_password", "new_email");
+        userDAO.createUser(user);
+        userDAO.clear();
+
+        var returned_user = userDAO.getUser("clear_username");
+
+        assertNull(returned_user);
+    }
 }
