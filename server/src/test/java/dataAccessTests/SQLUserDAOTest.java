@@ -1,13 +1,9 @@
 package dataAccessTests;
 
 import dataAccess.DataAccessException;
-import dataAccess.MemoryAuthDAO;
 import dataAccess.*;
 import model.UserData;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,11 +20,13 @@ public class SQLUserDAOTest {
         }
         return userDAO;
     }
+
     @AfterEach
-    public void cleanUp() throws DataAccessException {
+    public void cleanUp() throws DataAccessException { // empty user table after each run
         UserDAO userDAO = getUserDAO(SQLUserDAO.class);
         userDAO.clear();
     }
+
     @ParameterizedTest
     @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class})
     void createUserTestSuccess(Class<? extends UserDAO> userDAOClass) throws DataAccessException {
@@ -39,7 +37,7 @@ public class SQLUserDAOTest {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class}) // test for same username
+    @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class}) // test for same username existing
     void createUserTestFail(Class<? extends UserDAO> userDAOClass) throws DataAccessException {
         UserDAO userDAO = getUserDAO(userDAOClass);
         var first_user = new UserData("new_username", "new_password", "first_email");
@@ -63,7 +61,7 @@ public class SQLUserDAOTest {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class})
+    @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class}) // user doesn't exist
     void getUserTestFail(Class<? extends UserDAO> userDAOClass) throws DataAccessException {
         UserDAO userDAO = getUserDAO(userDAOClass);
 
@@ -92,7 +90,7 @@ public class SQLUserDAOTest {
 
     @ParameterizedTest
     @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class})
-    void getPasswordTestFail(Class<? extends UserDAO> userDAOClass) throws DataAccessException {
+    void getPasswordTestFail(Class<? extends UserDAO> userDAOClass) throws DataAccessException { // user doesn't exist
         UserDAO userDAO = getUserDAO(userDAOClass);
 
         var hashedPassword = userDAO.getPassword("not_a_real_username");
@@ -101,7 +99,7 @@ public class SQLUserDAOTest {
 
     @ParameterizedTest
     @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class})
-    void clearTest(Class<? extends UserDAO> userDAOClass) throws DataAccessException {
+    void clearTest(Class<? extends UserDAO> userDAOClass) throws DataAccessException { // creates a user in database and immediately clears database
         UserDAO userDAO = getUserDAO(userDAOClass);
 
         var user = new UserData("clear_username", "new_password", "new_email");

@@ -1,9 +1,8 @@
 package dataAccess;
-
+import dataAccess.*;
 import com.google.gson.Gson;
 import model.UserData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -12,7 +11,18 @@ import static java.sql.Types.NULL;
 public class SQLUserDAO implements UserDAO{
 
     public SQLUserDAO() throws DataAccessException {
-        configureDatabase();
+        String[] createStatements = {
+                """
+            CREATE TABLE IF NOT EXISTS user (
+            id int NOT NULL AUTO_INCREMENT,
+            username varchar(256) NOT NULL,
+            password varchar(256) NOT NULL,
+            email varchar(256) NOT NULL,
+            PRIMARY KEY (id)
+            );
+            """
+        };
+        DatabaseManager.configureDatabase(createStatements);
     }
     @Override
     public void clear() throws DataAccessException {
@@ -22,7 +32,7 @@ public class SQLUserDAO implements UserDAO{
                 ps.execute();
             }
         }catch (Exception e) {
-            throw new DataAccessException("Unable to get user");
+            throw new DataAccessException(e.getMessage());
         }
     }
 
@@ -37,7 +47,7 @@ public class SQLUserDAO implements UserDAO{
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String hashedPassword = encoder.encode(user.password());
 
-        var id = executeUpdate(statement, user.username(), hashedPassword, user.email());
+        var id = DatabaseManager.executeUpdate(statement, user.username(), hashedPassword, user.email());
         return "Success";
     }
 
@@ -48,10 +58,10 @@ public class SQLUserDAO implements UserDAO{
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1,username);
                 try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
+                    if (rs.next()) { // get user
                         return new UserData(rs.getString("username"),rs.getString("password"),rs.getString("email"));
                     }
-                    else {
+                    else { // user doesn't exist
                         return null;
                     }
                 }
@@ -78,53 +88,42 @@ public class SQLUserDAO implements UserDAO{
         }
         return null;
     }
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS user (
-            id int NOT NULL AUTO_INCREMENT,
-            username varchar(256) NOT NULL,
-            password varchar(256) NOT NULL,
-            email varchar(256) NOT NULL,
-            PRIMARY KEY (id)
-            );
-            """
-    };
 
-    public void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        }
-        catch (SQLException ex) {
-            throw new DataAccessException("Unable to configure database");
-        }
-    }
-
-    private int executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
-                for (var i = 0; i < params.length; i++) {
-                    var param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param instanceof UserData p) ps.setString(i + 1, p.toString());
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
-
-                var rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-                return 0;
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("unable to update database");
-        }
-    }
+//    public void configureDatabase() throws DataAccessException {
+//        DatabaseManager.createDatabase();
+//
+//        try (var conn = DatabaseManager.getConnection()) {
+//            for (var statement : createStatements) {
+//                try (var preparedStatement = conn.prepareStatement(statement)) {
+//                    preparedStatement.executeUpdate();
+//                }
+//            }
+//        }
+//        catch (SQLException ex) {
+//            throw new DataAccessException("Unable to configure database");
+//        }
+//    }
+//
+//    private int executeUpdate(String statement, Object... params) throws DataAccessException {
+//        try (var conn = DatabaseManager.getConnection()) {
+//            try (var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
+//                for (var i = 0; i < params.length; i++) {
+//                    var param = params[i];
+//                    if (param instanceof String p) ps.setString(i + 1, p);
+//                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
+//                    else if (param instanceof UserData p) ps.setString(i + 1, p.toString());
+//                    else if (param == null) ps.setNull(i + 1, NULL);
+//                }
+//                ps.executeUpdate();
+//
+//                var rs = ps.getGeneratedKeys();
+//                if (rs.next()) {
+//                    return rs.getInt(1);
+//                }
+//                return 0;
+//            }
+//        } catch (SQLException e) {
+//            throw new DataAccessException("unable to update database");
+//        }
+//    }
 }

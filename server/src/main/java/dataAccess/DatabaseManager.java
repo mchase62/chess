@@ -1,7 +1,11 @@
 package dataAccess;
 
+import model.UserData;
+
 import java.sql.*;
 import java.util.Properties;
+
+import static java.sql.Types.NULL;
 
 public class DatabaseManager {
     private static final String databaseName;
@@ -14,7 +18,6 @@ public class DatabaseManager {
      */
     static {
         try {
-            System.out.println("TRYING");
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
                 if (propStream == null) throw new Exception("Unable to load db.properties");
                 Properties props = new Properties();
@@ -36,7 +39,6 @@ public class DatabaseManager {
      */
     static void createDatabase() throws DataAccessException {
         try {
-            System.out.println("Creating");
             var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
             var conn = DriverManager.getConnection(connectionUrl, user, password);
             try (var preparedStatement = conn.prepareStatement(statement)) {
@@ -62,10 +64,46 @@ public class DatabaseManager {
     static Connection getConnection() throws DataAccessException {
         try {
             var conn = DriverManager.getConnection(connectionUrl, user, password);
-            System.out.println("CC");
             conn.setCatalog(databaseName);
-            System.out.println("DD");
             return conn;
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    public static void configureDatabase(String[] createStatements) throws DataAccessException {
+        DatabaseManager.createDatabase();
+
+        try (var conn = DatabaseManager.getConnection()) {
+            for (var statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException("Unable to configure database");
+        }
+    }
+
+    public static int executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
+                    else if (param instanceof UserData p) ps.setString(i + 1, p.toString());
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                ps.executeUpdate();
+
+                var rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+                return 0;
+            }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
