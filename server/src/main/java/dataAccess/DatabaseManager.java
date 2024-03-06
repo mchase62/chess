@@ -21,13 +21,10 @@ public class DatabaseManager {
                 props.load(propStream);
                 databaseName = props.getProperty("db.name");
                 user = props.getProperty("db.user");
-                System.out.println(user);
                 password = props.getProperty("db.password");
-                System.out.println(password);
                 var host = props.getProperty("db.host");
                 var port = Integer.parseInt(props.getProperty("db.port"));
                 connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
-                System.out.println(connectionUrl);
             }
         } catch (Exception ex) {
             throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
@@ -64,13 +61,8 @@ public class DatabaseManager {
      */
     static Connection getConnection() throws DataAccessException {
         try {
-            System.out.println("BB");
-            System.out.println(connectionUrl);
-            System.out.println(user);
-            System.out.println(password);
             var conn = DriverManager.getConnection(connectionUrl, user, password);
             System.out.println("CC");
-            System.out.println(databaseName);
             conn.setCatalog(databaseName);
             System.out.println("DD");
             return conn;
