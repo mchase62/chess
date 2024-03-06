@@ -26,6 +26,9 @@ public class SQLUserDAO implements UserDAO{
 //        }
 //        usersByUsername.put(user.username(), user); // put user in map
 //        return "Success";
+        if(getUser(user.username())!=null) { // the user already exists
+            return "Fail";
+        }
         var statement = "INSERT INTO user (username, password, email) values (?, ?, ?) ";
 //
         // hash the password
@@ -33,7 +36,7 @@ public class SQLUserDAO implements UserDAO{
         String hashedPassword = encoder.encode(user.password());
 
         var id = executeUpdate(statement, user.username(), hashedPassword, user.email());
-        return null;
+        return "Success";
     }
 
     @Override
@@ -42,6 +45,21 @@ public class SQLUserDAO implements UserDAO{
 //            return usersByUsername.get(username); // get user from map
 //        }
 //        return null; // return null if user doesn't exist
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username, password, email FROM user WHERE username=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1,username);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        System.out.println("rs");
+                        System.out.println(rs.getString("username"));
+                        return new UserData(rs.getString("username"),rs.getString("password"),rs.getString("email"));
+                    }
+                }
+            }
+        }catch (Exception e) {
+            throw new DataAccessException("Unable to get user");
+        }
         return null;
     }
 
