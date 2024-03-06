@@ -7,6 +7,7 @@ import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,4 +65,32 @@ public class SQLUserDAOTest {
 
         assertNull(returned_user);
     }
+
+    @ParameterizedTest
+    @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class})
+    void getPasswordTestSuccess(Class<? extends UserDAO> userDAOClass) throws DataAccessException {
+        UserDAO userDAO = getUserDAO(userDAOClass);
+
+        // add user
+        var user = new UserData("password_test_username", "new_password", "new_email");
+        userDAO.createUser(user);
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        var hashedPassword = userDAO.getPassword("password_test_username");
+        if(userDAOClass.isAssignableFrom(SQLUserDAO.class)) // if we stored and hashed the password in SQL
+            assertTrue(encoder.matches(user.password(), hashedPassword));
+        else
+            assertEquals(user.password(), hashedPassword);
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {SQLUserDAO.class, MemoryUserDAO.class})
+    void getPasswordTestFail(Class<? extends UserDAO> userDAOClass) throws DataAccessException {
+        UserDAO userDAO = getUserDAO(userDAOClass);
+
+        var hashedPassword = userDAO.getPassword("not_a_real_username");
+        assertNull(hashedPassword);
+    }
+
 }

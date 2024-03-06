@@ -2,6 +2,7 @@ package dataAccess;
 
 
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.xml.crypto.Data;
 import java.util.HashMap;
@@ -22,6 +23,8 @@ public class MemoryUserDAO implements UserDAO{
         if(usersByUsername.containsKey(user.username())) { // user already exists
             return "Fail";
         }
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(user.password());
         usersByUsername.put(user.username(), user); // put user in map
         return "Success";
     }
