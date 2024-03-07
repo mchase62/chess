@@ -132,7 +132,7 @@ public class SQLAuthDAOTest {
             // delete user from user database
             var deleteUserStatement = "DELETE FROM user";
 
-            status = authDAO.deleteAuth("wrong_auth"); // delete auth
+            authDAO.deleteAuth("wrong_auth"); // delete auth
             String returnedUser = authDAO.getUser(returnedAuth.authToken()); // get original
             DatabaseManager.executeUpdate(deleteUserStatement); // remove user from user database
             assertEquals(user.username(),returnedUser); // check if the user still existed
@@ -142,7 +142,7 @@ public class SQLAuthDAOTest {
             MemoryUserDAO userDAO = MemoryUserDAO.getInstance();
             userDAO.createUser(user);
 
-            returnedAuth = authDAO.createAuth(user.username());
+            authDAO.createAuth(user.username());
 
             status = authDAO.deleteAuth("wrong_auth");
 
@@ -191,7 +191,6 @@ public class SQLAuthDAOTest {
     @ValueSource(classes = {SQLAuthDAO.class, MemoryAuthDAO.class})
     void getUserTestFail(Class<? extends AuthDAO> authDAOClass) throws DataAccessException { // attempts to get user with a nonexistent token
         AuthDAO authDAO = getAuthDAO(authDAOClass);
-        AuthData returnedAuth;
         String returnedUser;
         var user = new UserData("auth_username", "auth_password", "auth_email");
 
