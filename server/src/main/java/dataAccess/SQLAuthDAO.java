@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class SQLAuthDAO implements AuthDAO{
 
-    public SQLAuthDAO() throws DataAccessException {
+    public SQLAuthDAO() {
         String[] createStatements = {
                 """
             CREATE TABLE IF NOT EXISTS auth (
@@ -21,7 +21,12 @@ public class SQLAuthDAO implements AuthDAO{
             );
             """
         };
-        DatabaseManager.configureDatabase(createStatements);
+        try {
+            DatabaseManager.configureDatabase(createStatements);
+        }
+        catch (DataAccessException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override

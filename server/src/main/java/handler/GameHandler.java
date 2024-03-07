@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryAuthDAO;
+import dataAccess.SQLAuthDAO;
 import model.AuthData;
 import model.UserData;
 import passoffTests.testClasses.TestModels;
@@ -18,7 +19,7 @@ import java.util.*;
 public class GameHandler {
     private final GameService gameService;
     private final Gson gson = new Gson();
-    private final AuthDAO authDAO = MemoryAuthDAO.getInstance();
+    private final AuthDAO authDAO = new SQLAuthDAO();
 
     public GameHandler(GameService gameService) {
         this.gameService = gameService;
@@ -53,7 +54,6 @@ public class GameHandler {
                 return gson.toJson(new ErrorResponse("Error: unauthorized", "Error: unauthorized"));
             }
             Collection<ListGamesResponse.GameItem> games = gameService.listGames();
-            System.out.println(gson.toJson(new ListGamesResponse(games)));
             return gson.toJson(new ListGamesResponse(games));
         }
         catch (DataAccessException e) {

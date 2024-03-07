@@ -62,7 +62,6 @@ public class PersistenceTests {
         joinRequest.gameID = createResult.gameID;
         joinRequest.playerColor = ChessGame.TeamColor.WHITE;
         serverFacade.verifyJoinPlayer(joinRequest, auth);
-
         Assertions.assertTrue(initialRowCount < getDatabaseRows(), "No new data added to database");
 
         // Test that we can read the data after a restart

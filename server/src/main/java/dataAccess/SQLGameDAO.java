@@ -4,16 +4,14 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import handler.ListGamesResponse;
 import model.GameData;
-import model.UserData;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 
 public class SQLGameDAO implements GameDAO{
+    public static SQLGameDAO instance;
     private int gameID;
-    public SQLGameDAO() throws DataAccessException {
+    public SQLGameDAO() {
         String[] createStatements = { // whiteUsername, String blackUsername, String gameName, ChessGame game
             """
             CREATE TABLE IF NOT EXISTS game (
@@ -27,7 +25,12 @@ public class SQLGameDAO implements GameDAO{
             );
             """
         };
-        DatabaseManager.configureDatabase(createStatements);
+        try {
+            DatabaseManager.configureDatabase(createStatements);
+        }
+        catch (DataAccessException e) {
+            System.out.println(e.getMessage());
+        }
         this.gameID = 0;
     }
 
@@ -84,32 +87,43 @@ public class SQLGameDAO implements GameDAO{
             throw new DataAccessException(e.getMessage());
         }
     }
-//        for (Map.Entry<Integer, GameData> entry : gamesByID.entrySet()) { // loop through games and convert to list
-//            ListGamesResponse.GameItem gameItem = new ListGamesResponse.GameItem(entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername());
-//            gamesList.add(gameItem);
-//        }
-//        return gamesList;
 
     @Override
     public String updateGame(String username, String playerColor, int gameID) throws DataAccessException {
-//        GameData gameData = gamesByID.get(gameID); // get the game data object
-//        if (gameData==null) // bad game id
-//            return "bad request";
-//        String white = gameData.whiteUsername();
-//        String black = gameData.blackUsername();
-//        if (playerColor == null) {
-//            return "success";
-//        }
-//        if (playerColor.equals("WHITE") && white == null) // if player chose white and it's not taken
-//            white = username;
-//        else if (playerColor.equals("BLACK") && black == null) // if player chose black and it's not taken
-//            black = username;
-//        else // both are taken
-//            return "already taken";
-//        GameData updatedGameData = new GameData(gameID, white, black, gameData.gameName(), gameData.game()); // create updated game
-//        gamesByID.put(gameID, updatedGameData);
-//        return "success";
-        return null;
+        GameData gameData;
+        String white;
+        String black;
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT game_json FROM game WHERE gameID=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1,gameID);
+                try (var rs = ps.executeQuery()) {
+                    if (!rs.next()) { // if game_json returned null, the gameID doesn't exist
+                        return "bad request";
+                    }
+                    else if (playerColor == null) {
+                        return "success";
+                    }
+                    else {
+                        String gameJson = rs.getString("game_json");
+                        gameData = new Gson().fromJson(gameJson, GameData.class);//entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername()
+                        white = gameData.whiteUsername();
+                        black = gameData.blackUsername();
+                        if (playerColor.equals("WHITE") && white == null) // if player chose white and it's not taken
+                            white = username;
+                        else if (playerColor.equals("BLACK") && black == null) // if player chose black and it's not taken
+                            black = username;
+                        GameData newGameData = new GameData(gameData.gameID(), white, black, gameData.gameName(), gameData.game());
+                        var json = new Gson().toJson(newGameData);
+                        var updateStatement = "UPDATE game SET white_username = ?, black_username = ?, game_json =? where game_id = ?";
+                        int returnedGameID =  DatabaseManager.executeUpdate(updateStatement, white, black, json, gameID); // returns 0 if game was not made
+                        return "success";
+                    }
+                }
+            }
+        }catch (Exception e) {
+            throw new DataAccessException("Unable to get user");
+        }
     }
 
     @Override
@@ -119,7 +133,7 @@ public class SQLGameDAO implements GameDAO{
             try (var ps = conn.prepareStatement(statement)) {
                 ps.execute();
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
     }

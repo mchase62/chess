@@ -13,7 +13,7 @@ public class GameService {
     private final GameDAO gameDAO;
 
     public GameService() {
-        gameDAO = MemoryGameDAO.getInstance();
+        gameDAO = new SQLGameDAO();
     }
 
     public int createGame(String gameName) throws DataAccessException {
