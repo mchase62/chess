@@ -64,15 +64,31 @@ public class SQLGameDAO implements GameDAO{
 
     @Override
     public Collection<ListGamesResponse.GameItem> listGames() throws DataAccessException {
-//        Collection<ListGamesResponse.GameItem> gamesList = new HashSet<>();
-//
+        Collection<ListGamesResponse.GameItem> gamesList = new HashSet<>();
+        String gameJson;
+        GameData gameData;
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT game_json FROM game";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        gameJson = rs.getString("game_json");
+                        gameData = new Gson().fromJson(gameJson, GameData.class);//entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername()
+                        ListGamesResponse.GameItem gameItem = new ListGamesResponse.GameItem(gameData.gameID(), gameData.gameName(), gameData.whiteUsername(),gameData.blackUsername());
+                        gamesList.add(gameItem);
+                    }
+                    return gamesList;
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
 //        for (Map.Entry<Integer, GameData> entry : gamesByID.entrySet()) { // loop through games and convert to list
 //            ListGamesResponse.GameItem gameItem = new ListGamesResponse.GameItem(entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername());
 //            gamesList.add(gameItem);
 //        }
 //        return gamesList;
-        return null;
-    }
 
     @Override
     public String updateGame(String username, String playerColor, int gameID) throws DataAccessException {
