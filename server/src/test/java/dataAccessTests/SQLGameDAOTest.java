@@ -48,7 +48,23 @@ public class SQLGameDAOTest{
         GameDAO gameDAO = getGameDAO(gameDAOClass);
         gameDAO.createGame("game_name");
         gameDAO.clear();
-        System.out.println(gameDAO.listGames().toString());
         assert(gameDAO.listGames().isEmpty()); // should be empty if games were deleted
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {SQLGameDAO.class, MemoryGameDAO.class})
+    void listGamesTestSuccess(Class<? extends GameDAO> gameDAOClass) throws DataAccessException { // adds 2 games to database
+        GameDAO gameDAO = getGameDAO(gameDAOClass);
+        gameDAO.createGame("first_game_name");
+        gameDAO.createGame("second_game_name");
+        assertEquals(2,gameDAO.listGames().size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {SQLGameDAO.class, MemoryGameDAO.class})
+    void listGamesTestFail(Class<? extends GameDAO> gameDAOClass) throws DataAccessException { // game wasn't created so list should be empty
+        GameDAO gameDAO = getGameDAO(gameDAOClass);
+        gameDAO.createGame("");
+        assert(gameDAO.listGames().isEmpty());
     }
 }
