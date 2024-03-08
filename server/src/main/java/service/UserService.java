@@ -33,7 +33,7 @@ public class UserService {
         if (encoder.matches(password, hashedPassword)) {
             return authDAO.createAuth(username);
         }
-        return null;
+        return new AuthData(null, null);
     }
 
     public String logout(String auth) throws DataAccessException {

@@ -41,7 +41,7 @@ public class UserHandler {
         try {
             UserData user = gson.fromJson(request.body(), UserData.class);
             AuthData auth = userService.login(user.username(), user.password());
-            if (auth == null) {
+            if (auth.authToken()==null) {
                 response.status(401);
                 return gson.toJson(new ErrorResponse("Error: unauthorized", "Error: unauthorized"));
             }

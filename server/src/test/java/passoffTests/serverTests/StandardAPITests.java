@@ -170,8 +170,6 @@ public class StandardAPITests {
                 "Authtoken returned by login matched authtoken from prior register");
         Assertions.assertNotEquals(loginOne.authToken, loginTwo.authToken,
                 "Authtoken returned by login matched authtoken from prior login");
-
-
         TestModels.TestCreateResult createResult = serverFacade.createGame(createRequest, existingAuth);
         Assertions.assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode(),
                 "Server response code was not 200 OK");

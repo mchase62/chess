@@ -61,6 +61,8 @@ public class SQLAuthDAO implements AuthDAO{
     }
     @Override
     public String deleteAuth(String auth) throws DataAccessException {
+        if (getUser(auth)==null)  // if the auth doesn't exist at the beginning
+            return "fail";
         try (var conn = DatabaseManager.getConnection()) {
             var delete_statement = "DELETE FROM auth WHERE auth_token=?";
             try (var ps = conn.prepareStatement(delete_statement)) {
@@ -97,34 +99,37 @@ public class SQLAuthDAO implements AuthDAO{
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
-
-        // check if user exists in auth table
-        try (var conn = DatabaseManager.getConnection()) {
-            var second_check_statement = "SELECT username FROM auth WHERE username=?";
-            try (var ps = conn.prepareStatement(second_check_statement)) {
-                ps.setString(1, username);
-                try (var rs = ps.executeQuery()) {
-                    if (!rs.next()) { // user doesn't exist in auth
-                        userExists = false;
-                    }
-                    else { // user exists in auth
-                        userExists = true;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
-        }
-
-        if(!userExists) { // the user doesn't exist in auth but does in user
-            var statement = "INSERT INTO auth (username, auth_token) values (?, ?) ";
-            DatabaseManager.executeUpdate(statement, username, auth);
-            return new AuthData(auth,username);
-        }
-        else { // user exists in auth and user
-            var statement = "UPDATE auth SET auth_token=? WHERE username=?";
-            DatabaseManager.executeUpdate(statement, auth, username);
-            return new AuthData(auth,username);
-        }
+        var statement = "INSERT INTO auth (username, auth_token) values (?, ?) ";
+        DatabaseManager.executeUpdate(statement, username, auth);
+        return new AuthData(auth,username);
+//
+//        // check if user exists in auth table
+//        try (var conn = DatabaseManager.getConnection()) {
+//            var second_check_statement = "SELECT username FROM auth WHERE username=?";
+//            try (var ps = conn.prepareStatement(second_check_statement)) {
+//                ps.setString(1, username);
+//                try (var rs = ps.executeQuery()) {
+//                    if (!rs.next()) { // user doesn't exist in auth
+//                        userExists = false;
+//                    }
+//                    else { // user exists in auth
+//                        userExists = true;
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            throw new DataAccessException(e.getMessage());
+//        }
+//
+//        if(!userExists) { // the user doesn't exist in auth but does in user
+//            var statement = "INSERT INTO auth (username, auth_token) values (?, ?) ";
+//            DatabaseManager.executeUpdate(statement, username, auth);
+//            return new AuthData(auth,username);
+//        }
+//        else { // user exists in auth and user
+//            var statement = "UPDATE auth SET auth_token=? WHERE username=?";
+//            DatabaseManager.executeUpdate(statement, auth, username);
+//            return new AuthData(auth,username);
+//        }
     }
 }

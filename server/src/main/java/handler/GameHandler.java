@@ -1,14 +1,9 @@
 package handler;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
-import dataAccess.MemoryAuthDAO;
 import dataAccess.SQLAuthDAO;
-import model.AuthData;
-import model.UserData;
-import passoffTests.testClasses.TestModels;
 import service.GameService;
 import spark.Request;
 import spark.Response;
@@ -41,6 +36,7 @@ public class GameHandler {
             response.status(200); // code was successful
             return gson.toJson(new CreateGameResponse(gameID));
         } catch (DataAccessException e) {
+            System.out.println(e.getMessage());
             response.status(500);
             return gson.toJson(new ErrorResponse("Error registering user", e.getMessage()));
         }
@@ -50,6 +46,7 @@ public class GameHandler {
         try {
             String auth = request.headers("Authorization"); // get auth token
             if (authDAO.getUser(auth) == null) { // auth token doesn't exist
+                System.out.println("In game");
                 response.status(401);
                 return gson.toJson(new ErrorResponse("Error: unauthorized", "Error: unauthorized"));
             }
@@ -66,7 +63,7 @@ public class GameHandler {
         try {
             String status;
             String auth = request.headers("Authorization"); // get auth token
-            String username = MemoryAuthDAO.getInstance().getUser(auth);
+            String username = authDAO.getUser(auth);
             if (username==null) { // if the user is not authorized
                 response.status(401);
                 status = "unauthorized";
