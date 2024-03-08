@@ -4,7 +4,6 @@ import service.ClearService;
 import spark.*;
 import com.google.gson.Gson;
 
-import com.google.gson.Gson;
 public class ClearHandler {
     private ClearService clearService;
     private final Gson gson = new Gson();

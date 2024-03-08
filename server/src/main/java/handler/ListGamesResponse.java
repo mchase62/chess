@@ -1,10 +1,7 @@
 package handler;
 
-import model.GameData;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 public class ListGamesResponse extends HandlerResponse{
     private Collection<GameItem> games;

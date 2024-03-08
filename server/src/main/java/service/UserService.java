@@ -4,8 +4,6 @@ import model.AuthData;
 import model.UserData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.UUID;
-
 public class UserService {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
