@@ -102,34 +102,5 @@ public class SQLAuthDAO implements AuthDAO{
         var statement = "INSERT INTO auth (username, auth_token) values (?, ?) ";
         DatabaseManager.executeUpdate(statement, username, auth);
         return new AuthData(auth,username);
-//
-//        // check if user exists in auth table
-//        try (var conn = DatabaseManager.getConnection()) {
-//            var second_check_statement = "SELECT username FROM auth WHERE username=?";
-//            try (var ps = conn.prepareStatement(second_check_statement)) {
-//                ps.setString(1, username);
-//                try (var rs = ps.executeQuery()) {
-//                    if (!rs.next()) { // user doesn't exist in auth
-//                        userExists = false;
-//                    }
-//                    else { // user exists in auth
-//                        userExists = true;
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new DataAccessException(e.getMessage());
-//        }
-//
-//        if(!userExists) { // the user doesn't exist in auth but does in user
-//            var statement = "INSERT INTO auth (username, auth_token) values (?, ?) ";
-//            DatabaseManager.executeUpdate(statement, username, auth);
-//            return new AuthData(auth,username);
-//        }
-//        else { // user exists in auth and user
-//            var statement = "UPDATE auth SET auth_token=? WHERE username=?";
-//            DatabaseManager.executeUpdate(statement, auth, username);
-//            return new AuthData(auth,username);
-//        }
     }
 }
