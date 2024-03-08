@@ -50,7 +50,7 @@ public class SQLGameDAO implements GameDAO{
                 try (var rs = ps.executeQuery()) {
                     if (!rs.next()) { // if game returned null, it doesn't already exist with that gameName
                         ChessGame chessGame = new ChessGame();
-                        GameData gameData = new GameData(gameID, "", "", gameName,chessGame);
+                        GameData gameData = new GameData(gameID, null, null, gameName,chessGame);
                         var json = new Gson().toJson(gameData);
                         var insert_statement = "INSERT INTO game (game_id, game_name, game_json) values (?,?,?)";
                         int returnedGameID =  DatabaseManager.executeUpdate(insert_statement, gameID, gameName, json); // returns 0 if game was not made
@@ -94,7 +94,7 @@ public class SQLGameDAO implements GameDAO{
         String white;
         String black;
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT game_json FROM game WHERE gameID=?";
+            var statement = "SELECT game_json FROM game WHERE game_id=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setInt(1,gameID);
                 try (var rs = ps.executeQuery()) {
@@ -113,10 +113,12 @@ public class SQLGameDAO implements GameDAO{
                             white = username;
                         else if (playerColor.equals("BLACK") && black == null) // if player chose black and it's not taken
                             black = username;
+                        else
+                            return "already taken";
                         GameData newGameData = new GameData(gameData.gameID(), white, black, gameData.gameName(), gameData.game());
                         var json = new Gson().toJson(newGameData);
                         var updateStatement = "UPDATE game SET white_username = ?, black_username = ?, game_json =? where game_id = ?";
-                        int returnedGameID =  DatabaseManager.executeUpdate(updateStatement, white, black, json, gameID); // returns 0 if game was not made
+                        DatabaseManager.executeUpdate(updateStatement, white, black, json, gameID); // returns 0 if game was not made
                         return "success";
                     }
                 }

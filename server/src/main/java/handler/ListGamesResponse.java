@@ -19,6 +19,23 @@ public class ListGamesResponse extends HandlerResponse{
         private final String whiteUsername;
         private final String blackUsername;
         private final String gameName;
+
+        public int getGameID() {
+            return gameID;
+        }
+
+        public String getWhiteUsername() {
+            return whiteUsername;
+        }
+
+        public String getBlackUsername() {
+            return blackUsername;
+        }
+
+        public String getGameName() {
+            return gameName;
+        }
+
         public GameItem(int gameID, String gameName, String whiteUsername, String blackUsername) {
             this.gameID = gameID;
             this.whiteUsername = whiteUsername;

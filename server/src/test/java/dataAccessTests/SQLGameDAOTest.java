@@ -7,6 +7,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SQLGameDAOTest{
@@ -24,6 +26,10 @@ public class SQLGameDAOTest{
     public void cleanUp() throws DataAccessException { // empty game table after each run
         GameDAO gameDAO = getGameDAO(SQLGameDAO.class);
         gameDAO.clear();
+        UserDAO sqlUserDAO = new SQLUserDAO();
+        sqlUserDAO.clear();
+        UserDAO memoryUserDAO = MemoryUserDAO.getInstance();
+        memoryUserDAO.clear();
     }
 
     @ParameterizedTest
@@ -66,5 +72,39 @@ public class SQLGameDAOTest{
         GameDAO gameDAO = getGameDAO(gameDAOClass);
         gameDAO.createGame("");
         assert(gameDAO.listGames().isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {SQLGameDAO.class, MemoryGameDAO.class})
+    void joinGameTestSuccess(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
+        GameDAO gameDAO = getGameDAO(gameDAOClass);
+        int gameID = gameDAO.createGame("game_name");
+
+        UserDAO userDAO = new SQLUserDAO();
+        userDAO.createUser(new UserData("new_user","new_password","new_email"));
+
+        gameDAO.updateGame("new_user","WHITE", gameID);
+
+        var gamesList = new ArrayList<>(gameDAO.listGames());
+        var white_username = gamesList.getFirst().getWhiteUsername();
+        assertEquals("new_user", white_username);
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {SQLGameDAO.class, MemoryGameDAO.class})
+    void joinGameTestFail(Class<? extends GameDAO> gameDAOClass) throws DataAccessException { // tries adding a user to an already taken color
+        GameDAO gameDAO = getGameDAO(gameDAOClass);
+        int gameID = gameDAO.createGame("game_name");
+
+        UserDAO userDAO = new SQLUserDAO();
+        userDAO.createUser(new UserData("first_user","new_password","new_email"));
+
+        gameDAO.updateGame("first_user","WHITE", gameID);
+
+        userDAO.createUser(new UserData("second_user","new_password","new_email"));
+        gameDAO.updateGame("second_user","WHITE", gameID);
+        var gamesList = new ArrayList<>(gameDAO.listGames());
+        var white_username = gamesList.getFirst().getWhiteUsername();
+        assertEquals("first_user", white_username);
     }
 }

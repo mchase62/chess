@@ -46,7 +46,6 @@ public class GameHandler {
         try {
             String auth = request.headers("Authorization"); // get auth token
             if (authDAO.getUser(auth) == null) { // auth token doesn't exist
-                System.out.println("In game");
                 response.status(401);
                 return gson.toJson(new ErrorResponse("Error: unauthorized", "Error: unauthorized"));
             }
