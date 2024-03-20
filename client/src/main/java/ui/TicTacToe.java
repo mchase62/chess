@@ -26,7 +26,7 @@ public class TicTacToe {
 
         drawTicTacToeBoard(out);
 
-        out.print(SET_BG_COLOR_BLACK);
+        out.print(SET_BG_COLOR_BLUE);
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
@@ -38,7 +38,8 @@ public class TicTacToe {
         for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
             drawHeader(out, headers[boardCol]);
 
-            if (boardCol < BOARD_SIZE_IN_SQUARES - 1) {
+            if (boardCol < BOARD_SIZE_IN_SQUARES - 1) { // i think this just adds another area of empty spaces if not the last
+//                System.out.print("Inside this conditional");
                 out.print(EMPTY.repeat(LINE_WIDTH_IN_CHARS));
             }
         }
@@ -49,17 +50,17 @@ public class TicTacToe {
     private static void drawHeader(PrintStream out, String headerText) {
         int prefixLength = SQUARE_SIZE_IN_CHARS / 2;
         int suffixLength = SQUARE_SIZE_IN_CHARS - prefixLength - 1;
-
-        out.print(EMPTY.repeat(prefixLength));
-        printHeaderText(out, headerText);
+//        out.print("This is empty.repeat()");
+        out.print(EMPTY.repeat(prefixLength)); // prints out the empty space between words in header
+        printHeaderText(out, headerText); // prints out the text
         out.print(EMPTY.repeat(suffixLength));
     }
 
     private static void printHeaderText(PrintStream out, String player) {
-        out.print(SET_BG_COLOR_BLACK);
+        out.print(SET_BG_COLOR_WHITE);
         out.print(SET_TEXT_COLOR_GREEN);
 
-        out.print(player);
+        out.print(player); // idk why uses player
 
         setBlack(out);
     }
@@ -70,20 +71,21 @@ public class TicTacToe {
 
             drawRowOfSquares(out);
 
-            if (boardRow < BOARD_SIZE_IN_SQUARES - 1) {
-                drawVerticalLine(out);
-                setBlack(out);
-            }
+//            if (boardRow < BOARD_SIZE_IN_SQUARES - 1) {
+//                drawVerticalLine(out);
+//                setBlack(out);
+//            }
         }
     }
 
     private static void drawRowOfSquares(PrintStream out) {
 
-        for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_CHARS; ++squareRow) {
-            for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
+        for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_CHARS; ++squareRow) { // square is 3
+            for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) { // size is 3
                 setWhite(out);
 
-                if (squareRow == SQUARE_SIZE_IN_CHARS / 2) {
+                if (squareRow == SQUARE_SIZE_IN_CHARS / 2) { // whenever squareRow is 1
+
                     int prefixLength = SQUARE_SIZE_IN_CHARS / 2;
                     int suffixLength = SQUARE_SIZE_IN_CHARS - prefixLength - 1;
 
