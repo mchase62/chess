@@ -7,6 +7,7 @@ import exception.ResponseException;
 
 public class ChessClient {
     private String userName = null;
+    private String password = null;
     private final ServerFacade server;
     private final String serverUrl;
     private final NotificationHandler notificationHandler;
@@ -46,15 +47,19 @@ public class ChessClient {
         }
     }
 
+    public String register(String ... params) throws ResponseException {
+        return "";
+    }
     public String logIn(String... params) throws ResponseException {
-        if (params.length >= 1) {
+        if (params.length >= 2) {
             state = State.SIGNEDIN;
-            userName = String.join("-", params);
+            userName = params[1];
+            password = params[2];
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(visitorName);
             return String.format("You signed in as %s.", userName);
         }
-        throw new ResponseException(400, "Expected: <yourname>");
+        throw new ResponseException(400, "Expected: <USERNAME> <PASSWORD>");
     }
 
     public String help() {
@@ -75,5 +80,10 @@ public class ChessClient {
                 quit - playing chess
                 help with possible commands
                 """;
+    }
+
+    private void assertSignedIn() throws ResponseException {
+        if (state == State.SIGNEDOUT)
+            throw new ResponseException(400, "You must sign in");
     }
 }
