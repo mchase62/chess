@@ -22,7 +22,7 @@ public class Repl implements NotificationHandler {
             String line = scanner.nextLine();
 
             try {
-                result = line;
+                result = client.eval(line);
                 System.out.println(SET_TEXT_COLOR_BLUE + result);
             }
             catch (Throwable e) {
