@@ -1,6 +1,8 @@
 package client;
 
 import client.websocket.NotificationHandler;
+import webSocketMessages.Notification;
+
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
@@ -35,5 +37,11 @@ public class Repl implements NotificationHandler {
 
     private void printPrompt() {
         System.out.print("\n" + SET_TEXT_COLOR_BLUE + ">>> ");
+    }
+
+    @Override
+    public void notify(Notification notification) {
+        System.out.println(SET_TEXT_COLOR_RED + notification.message());
+        printPrompt();
     }
 }

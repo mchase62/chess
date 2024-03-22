@@ -9,10 +9,10 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-//
+
 ////need to extend Endpoint for websocket to work properly
 public class WebSocketFacade extends Endpoint {
-//
+
     Session session;
     NotificationHandler notificationHandler;
 
@@ -39,20 +39,20 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-//    //Endpoint requires this method, but you don't have to do anything
+    //Endpoint requires this method, but you don't have to do anything
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
-//
-//    public void enterPetShop(String visitorName) throws ResponseException {
-//        try {
-//            var action = new Action(Action.Type.ENTER, visitorName);
-//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-//        } catch (IOException ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
-//
+
+    public void enterPetShop(String visitorName) throws ResponseException {
+        try {
+            var action = new Action(Action.Type.ENTER, visitorName);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
 //    public void leavePetShop(String visitorName) throws ResponseException {
 //        try {
 //            var action = new Action(Action.Type.EXIT, visitorName);
