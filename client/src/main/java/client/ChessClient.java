@@ -58,7 +58,7 @@ public class ChessClient {
             email = params[2];
             ws = new WebSocketFacade(serverUrl, notificationHandler);
             System.out.println("HERE");
-            ws.enterPetShop(userName);
+            ws.register(userName, password, email);
             state = State.SIGNEDIN;
             return String.format("You registered as %s.", userName);
         }
@@ -69,7 +69,7 @@ public class ChessClient {
             userName = params[0];
             password = params[1];
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.enterPetShop(userName);
+//            ws.enterPetShop(userName);
             state = State.SIGNEDIN;
             return String.format("You signed in as %s.", userName);
         }

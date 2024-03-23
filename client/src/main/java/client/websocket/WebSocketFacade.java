@@ -44,9 +44,18 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void enterPetShop(String visitorName) throws ResponseException {
+//    public void enterPetShop(String visitorName) throws ResponseException {
+//        try {
+//            var action = new Action(Action.Type.ENTER, visitorName);
+//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+//        } catch (IOException ex) {
+//            throw new ResponseException(500, ex.getMessage());
+//        }
+//    }
+
+    public void register(String username, String password, String email) throws ResponseException {
         try {
-            var action = new Action(Action.Type.ENTER, visitorName);
+            var action = new Action(Action.Type.REGISTER,username);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());
