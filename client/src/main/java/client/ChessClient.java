@@ -1,6 +1,7 @@
 package client;
 
 import client.websocket.WebSocketFacade;
+import model.UserData;
 import server.ServerFacade;
 import client.websocket.NotificationHandler;
 import java.util.Arrays;
@@ -60,6 +61,8 @@ public class ChessClient {
             System.out.println("HERE");
             ws.register(userName, password, email);
             state = State.SIGNEDIN;
+            UserData newUser = new UserData(userName, password, email);
+            server.register(newUser);
             return String.format("You registered as %s.", userName);
         }
         throw new ResponseException(400, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
