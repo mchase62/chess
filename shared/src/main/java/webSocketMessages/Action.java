@@ -2,9 +2,9 @@ package webSocketMessages;
 
 import com.google.gson.Gson;
 
-public record Action(Type type, String visitorName) {
+public record Action(Type type, String userName) {
     public enum Type {
-        REGISTER,
+        ENTER,
         EXIT
     }
 

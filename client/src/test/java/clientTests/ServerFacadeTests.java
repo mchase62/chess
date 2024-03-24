@@ -38,7 +38,10 @@ public class ServerFacadeTests {
         NotificationHandlerImpl handler = new NotificationHandlerImpl();
         client = new ChessClient("http://localhost:8080",handler);
         try {
-            client.register("bbq", "bbq", "bbq");
+            String result = client.logIn("bbqyou", "bbq");
+            System.out.println("Result: " + result);
+            client.createGame("bbq_game");
+
         } catch (ResponseException e) {
             System.out.println(e.toString());
         }

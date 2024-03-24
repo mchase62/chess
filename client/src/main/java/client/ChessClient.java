@@ -1,6 +1,8 @@
 package client;
 
+import chess.ChessGame;
 import client.websocket.WebSocketFacade;
+import model.GameData;
 import model.UserData;
 import server.ServerFacade;
 import client.websocket.NotificationHandler;
@@ -10,7 +12,7 @@ import exception.ResponseException;
 public class ChessClient {
     private String userName = null;
     private String password = null;
-    private String email = null;
+    private String auth = null;
     private final ServerFacade server;
     private final String serverUrl;
     private final NotificationHandler notificationHandler;
@@ -33,15 +35,14 @@ public class ChessClient {
 
     public String eval(String input) {
         try {
-            System.out.println(input);
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "login" -> logIn(params);
                 case "register" -> register(params);
-//                case "signout" -> signOut();
-//                case "adopt" -> adoptPet(params);
+                case "logout" -> logOut();
+                case "create" -> createGame(params);
 //                case "adoptall" -> adoptAllPets();
                 case "quit" -> "quit";
                 default -> help();
@@ -52,17 +53,16 @@ public class ChessClient {
     }
 
     public String register(String... params) throws ResponseException {
-        System.out.println(params.length);
         if (params.length >= 3) {
             userName = params[0];
             password = params[1];
-            email = params[2];
+            String email = params[2];
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            System.out.println("HERE");
-            ws.register(userName, password, email);
-            state = State.SIGNEDIN;
+            ws.enterChessServer(userName);
             UserData newUser = new UserData(userName, password, email);
             server.register(newUser);
+            server.login(newUser);
+            state = State.SIGNEDIN;
             return String.format("You registered as %s.", userName);
         }
         throw new ResponseException(400, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
@@ -72,13 +72,33 @@ public class ChessClient {
             userName = params[0];
             password = params[1];
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterPetShop(userName);
+            ws.enterChessServer(userName);
+            UserData user = new UserData(userName, password,"");
+            auth = server.login(user).authToken();
             state = State.SIGNEDIN;
-            return String.format("You signed in as %s.", userName);
+            return String.format("You logged in as %s.", userName);
         }
         throw new ResponseException(400, "Expected: <USERNAME> <PASSWORD>");
     }
 
+    public String logOut() throws ResponseException {
+        assertSignedIn();
+        ws.leaveChessServer(userName);
+        ws = null;
+        state = State.SIGNEDOUT;
+        return String.format("%s logged out.", userName);
+    }
+
+    public String createGame(String... params) throws ResponseException {
+        if (params.length >= 1) {
+            String gameName = params[0];
+            ChessGame chessGame = new ChessGame();
+            GameData game = new GameData(0,null,null,gameName, chessGame);
+            server.createGame(game, auth);
+            return String.format("%s created.", gameName);
+        }
+        throw new ResponseException(400, "Expected: create <NAME>");
+    }
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """

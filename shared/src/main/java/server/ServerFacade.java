@@ -2,7 +2,10 @@ package server;
 
 import exception.ResponseException;
 import com.google.gson.Gson;
+import model.AuthData;
+import model.GameData;
 import model.UserData;
+import org.glassfish.grizzly.http.server.Response;
 
 import java.io.*;
 import java.net.*;
@@ -17,18 +20,28 @@ public class ServerFacade {
 
     public UserData register(UserData user) throws ResponseException {
         var path = "/user";
-        return this.makeRequest("POST", path, user, UserData.class);
+        return this.makeRequest("POST", path, user, UserData.class, null);
     }
 
+    public AuthData login(UserData user) throws ResponseException {
+        var path = "/session";
+        return this.makeRequest("POST", path, user, AuthData.class, null);
+    }
 
+    public GameData createGame(GameData game, String auth) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("POST", path, game, GameData.class, auth);
+    }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String header) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
+            // Add Authorization header
+            http.setRequestProperty("Authorization", header);
             writeBody(request, http);
             http.connect();
             throwIfNotSuccessful(http);
