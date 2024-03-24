@@ -2,6 +2,7 @@ package clientTests;
 
 import client.ChessClient;
 import client.websocket.NotificationHandler;
+import exception.ResponseException;
 import org.junit.jupiter.api.*;
 import server.Server;
 import webSocketMessages.Notification;
@@ -22,7 +23,7 @@ public class ServerFacadeTests {
     @BeforeAll
     public static void init() {
         server = new Server();
-        var port = server.run(0);
+        var port = server.run(8080);
         System.out.println("Started test HTTP server on " + port);
     }
 
@@ -36,6 +37,11 @@ public class ServerFacadeTests {
     public void sampleTest() {
         NotificationHandlerImpl handler = new NotificationHandlerImpl();
         client = new ChessClient("http://localhost:8080",handler);
+        try {
+            client.register("bbq", "bbq", "bbq");
+        } catch (ResponseException e) {
+            System.out.println(e.toString());
+        }
         Assertions.assertTrue(true);
     }
 

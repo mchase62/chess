@@ -20,12 +20,13 @@ public class WebSocketFacade extends Endpoint {
     public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
         try {
             url = url.replace("http", "ws");
+            System.out.println("23");
             URI socketURI = new URI(url + "/connect");
             this.notificationHandler = notificationHandler;
-
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+            System.out.println(socketURI.toString());
             this.session = container.connectToServer(this, socketURI);
-
+            System.out.println("26");
             //set message handler
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
@@ -55,6 +56,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void register(String username, String password, String email) throws ResponseException {
         try {
+            System.out.println("Register in websocketfacade");
             var action = new Action(Action.Type.REGISTER,username);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
