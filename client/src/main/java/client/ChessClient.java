@@ -45,6 +45,7 @@ public class ChessClient {
                 case "logout" -> logOut();
                 case "create" -> createGame(params);
                 case "observe" -> observeGame(params);
+                case "join" -> joinGame(params);
                 case "list" -> listGames();
                 case "quit" -> "quit";
                 default -> help();
@@ -63,7 +64,7 @@ public class ChessClient {
             ws.enterChessServer(userName);
             UserData newUser = new UserData(userName, password, email);
             server.register(newUser);
-            server.login(newUser);
+            auth = server.login(newUser).authToken();
             state = State.SIGNEDIN;
             return String.format("You registered as %s.", userName);
         }
@@ -111,6 +112,7 @@ public class ChessClient {
         if (params.length >= 1) {
             String gameID = params[0];
             playerColor = (params.length >= 2) ? params[1] : null;
+            playerColor = playerColor.toUpperCase();
             server.joinGame(playerColor, Integer.parseInt(gameID), auth);
             return String.format("Joined Game " + gameID + " as playerColor");
         }

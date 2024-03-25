@@ -68,7 +68,14 @@ public class GameHandler {
                 status = "unauthorized";
                 return gson.toJson(new ErrorResponse("Error: " + status, "Error: " + status));
             }
-            GameRequest gameRequest= gson.fromJson(request.body(), GameRequest.class);
+            Map<String, Object> jsonMap = gson.fromJson(request.body(), Map.class);
+            String playerColor;
+            if (jsonMap.get("playerColor") != null)
+                playerColor = jsonMap.get("playerColor").toString();
+            else
+                playerColor = null;
+            int gameID = (int) Math.round((double)jsonMap.get("gameID"));
+            GameRequest gameRequest = new GameRequest(playerColor, gameID);
 
             status = gameService.joinGame(username, gameRequest.getPlayerColor(), gameRequest.getGameID());
 
