@@ -19,12 +19,12 @@ public class ServerFacade {
         this.serverUrl = serverUrl;
     }
 
-    public UserData register(UserData user) throws ResponseException {
+    public UserData register(UserData user) throws ResponseException { // returns user with username
         var path = "/user";
         return this.makeRequest("POST", path, user, UserData.class, null);
     }
 
-    public AuthData login(UserData user) throws ResponseException {
+    public AuthData login(UserData user) throws ResponseException { // returns auth token
         var path = "/session";
         return this.makeRequest("POST", path, user, AuthData.class, null);
     }
@@ -34,7 +34,7 @@ public class ServerFacade {
         return this.makeRequest("DELETE", path, null, null, auth);
     }
 
-    public GameData createGame(GameData game, String auth) throws ResponseException {
+    public GameData createGame(GameData game, String auth) throws ResponseException { // returns gameData
         var path = "/game";
         return this.makeRequest("POST", path, game, GameData.class, auth);
     }
