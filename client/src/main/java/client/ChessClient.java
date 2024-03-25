@@ -8,6 +8,7 @@ import server.ServerFacade;
 import client.websocket.NotificationHandler;
 import java.util.Arrays;
 import exception.ResponseException;
+import ui.TicTacToe;
 
 public class ChessClient {
     private String userName = null;
