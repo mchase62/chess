@@ -40,8 +40,10 @@ public class ServerFacadeTests {
         try {
             String result = client.logIn("bbqyou", "bbq");
             System.out.println("Result: " + result);
-            client.createGame("bbq_game");
-
+//            result = client.createGame("bbq_game");
+            System.out.println("Result: " + result);
+            result = client.observeGame("1");
+            System.out.println("Result: " + result);
         } catch (ResponseException e) {
             System.out.println(e.toString());
         }

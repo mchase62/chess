@@ -43,7 +43,8 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "logout" -> logOut();
                 case "create" -> createGame(params);
-//                case "adoptall" -> adoptAllPets();
+                case "observe" -> observeGame(params);
+                case "list" -> listGames();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -83,6 +84,7 @@ public class ChessClient {
 
     public String logOut() throws ResponseException {
         assertSignedIn();
+        server.logout(auth);
         ws.leaveChessServer(userName);
         ws = null;
         state = State.SIGNEDOUT;
@@ -90,6 +92,7 @@ public class ChessClient {
     }
 
     public String createGame(String... params) throws ResponseException {
+        assertSignedIn();
         if (params.length >= 1) {
             String gameName = params[0];
             ChessGame chessGame = new ChessGame();
@@ -99,6 +102,35 @@ public class ChessClient {
         }
         throw new ResponseException(400, "Expected: create <NAME>");
     }
+
+    public String joinGame(String... params) throws ResponseException {
+        String playerColor = null;
+        GameData game;
+        assertSignedIn();
+        if (params.length >= 1) {
+            String gameID = params[0];
+            playerColor = (params.length >= 2) ? params[1] : null;
+            server.joinGame(playerColor, Integer.parseInt(gameID), auth);
+            return String.format("Joined Game " + gameID + " as playerColor");
+        }
+        throw new ResponseException(400, "Expected: join <ID> [WHITE|BLACK]<empty>]");
+    }
+
+    public String observeGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 1) {
+            String gameID = params[0];
+            server.joinGame(null, Integer.parseInt(gameID), auth);
+            return String.format("Observing Game " + gameID);
+        }
+        throw new ResponseException(400, "Expected: observe <ID>");
+    }
+
+    public String listGames() throws ResponseException {
+        assertSignedIn();
+        ListGamesResponse games = server.listGames(auth);
+    }
+
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
@@ -112,7 +144,7 @@ public class ChessClient {
                 create <NAME> - a game
                 list - games
                 join <ID> [WHITE|BLACK]<empty>] - a game
-                observer <ID> - a game
+                observe <ID> - a game
                 logout - when you are done
                 quit - playing chess
                 help with possible commands

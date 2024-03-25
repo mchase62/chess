@@ -5,10 +5,11 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.glassfish.grizzly.http.server.Response;
 
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ServerFacade {
     private final String serverUrl;
@@ -28,11 +29,29 @@ public class ServerFacade {
         return this.makeRequest("POST", path, user, AuthData.class, null);
     }
 
+    public Object logout(String auth) throws ResponseException {
+        var path = "/session";
+        return this.makeRequest("DELETE", path, null, null, auth);
+    }
+
     public GameData createGame(GameData game, String auth) throws ResponseException {
         var path = "/game";
         return this.makeRequest("POST", path, game, GameData.class, auth);
     }
 
+    public GameData joinGame(String playerColor, int gameID, String auth) throws ResponseException {
+        var path = "/game";
+        Map<String, Object> jsonMap = new HashMap<>();
+        jsonMap.put("playerColor", playerColor);
+        jsonMap.put("gameID", gameID);
+        return this.makeRequest("PUT", path, jsonMap, GameData.class, auth);
+    }
+
+    public String listGames(String auth) throws ResponseException {
+        var path = "/game";
+
+        return this.makeRequest("GET", path, null, , auth);
+    }
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String header) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();

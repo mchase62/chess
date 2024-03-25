@@ -63,12 +63,14 @@ public class GameHandler {
             String status;
             String auth = request.headers("Authorization"); // get auth token
             String username = authDAO.getUser(auth);
+            System.out.println(username);
             if (username==null) { // if the user is not authorized
                 response.status(401);
                 status = "unauthorized";
                 return gson.toJson(new ErrorResponse("Error: " + status, "Error: " + status));
             }
             GameRequest gameRequest= gson.fromJson(request.body(), GameRequest.class);
+
             status = gameService.joinGame(username, gameRequest.getPlayerColor(), gameRequest.getGameID());
 
             if(status.equals("already taken")) { // spot taken
