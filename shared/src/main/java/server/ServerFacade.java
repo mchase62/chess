@@ -47,10 +47,13 @@ public class ServerFacade {
         return this.makeRequest("PUT", path, jsonMap, GameData.class, auth);
     }
 
-    public String listGames(String auth) throws ResponseException {
+    public GameData[] listGames(String auth) throws ResponseException {
         var path = "/game";
+        record listGameResponse(GameData[] games, String[] whiteUsernames, String[] blackUsernames) {
 
-        return this.makeRequest("GET", path, null, , auth);
+        }
+        var response = this.makeRequest("GET", path, null, listGameResponse.class, auth);
+        return response.games();
     }
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String header) throws ResponseException {
         try {

@@ -40,10 +40,17 @@ public class ServerFacadeTests {
         try {
             String result = client.logIn("bbqyou", "bbq");
             System.out.println("Result: " + result);
-//            result = client.createGame("bbq_game");
+            result = client.createGame("bbq_game1");
+            result = client.createGame("bbq_game2");
+            result = client.createGame("bbq_game3");
+            result = client.createGame("bbq_game4");
             System.out.println("Result: " + result);
-            result = client.observeGame("1");
+            result = client.joinGame("1", "WHITE");
             System.out.println("Result: " + result);
+            result = client.joinGame("3", "WHITE");
+            result = client.joinGame("4", "BLACK");
+            result = client.listGames();
+            System.out.println("Result: \n" + result);
         } catch (ResponseException e) {
             System.out.println(e.toString());
         }

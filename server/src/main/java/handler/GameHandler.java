@@ -63,7 +63,6 @@ public class GameHandler {
             String status;
             String auth = request.headers("Authorization"); // get auth token
             String username = authDAO.getUser(auth);
-            System.out.println(username);
             if (username==null) { // if the user is not authorized
                 response.status(401);
                 status = "unauthorized";

@@ -128,7 +128,15 @@ public class ChessClient {
 
     public String listGames() throws ResponseException {
         assertSignedIn();
-        ListGamesResponse games = server.listGames(auth);
+        GameData[] games = server.listGames(auth);
+        String list = "";
+        for (int i = 0; i < games.length; i++) {
+            String formattedGameName = String.format("%-20s", games[i].gameName()); // Adjust the padding length as needed
+            String formattedWhiteUsername = String.format("%-20s", games[i].whiteUsername()); // Adjust the padding length as needed
+            String formattedBlackUsername = String.format("%-20s", games[i].blackUsername()); // Adjust the padding length as needed
+            list += (i + 1) + ". " + formattedGameName + "  White: " + formattedWhiteUsername + "  Black: " + formattedBlackUsername + "\n";
+        }
+        return list;
     }
 
     public String help() {
