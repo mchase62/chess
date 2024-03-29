@@ -114,7 +114,7 @@ public class ChessClient {
             playerColor = (params.length >= 2) ? params[1] : null;
             playerColor = playerColor.toUpperCase();
             server.joinGame(playerColor, Integer.parseInt(gameID), auth);
-            return String.format("Joined Game " + gameID + " as playerColor");
+            return String.format("Joined Game " + gameID + " as " + playerColor);
         }
         throw new ResponseException(400, "Expected: join <ID> [WHITE|BLACK]<empty>]");
     }
