@@ -61,7 +61,7 @@ public class ChessClient {
             password = params[1];
             String email = params[2];
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.enterChessServer(userName);
+//            ws.enterChessServer(userName);
             UserData newUser = new UserData(userName, password, email);
             server.register(newUser);
             auth = server.login(newUser).authToken();
@@ -75,7 +75,7 @@ public class ChessClient {
             userName = params[0];
             password = params[1];
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.enterChessServer(userName);
+//            ws.enterChessServer(userName);
             UserData user = new UserData(userName, password,"");
             auth = server.login(user).authToken();
             state = State.SIGNEDIN;
