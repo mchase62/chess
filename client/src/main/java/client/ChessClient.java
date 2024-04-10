@@ -75,7 +75,7 @@ public class ChessClient {
             userName = params[0];
             password = params[1];
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterChessServer(userName);
+            ws.enterChessServer(userName);
             UserData user = new UserData(userName, password,"");
             auth = server.login(user).authToken();
             state = State.SIGNEDIN;
@@ -113,7 +113,8 @@ public class ChessClient {
             String gameID = params[0];
             playerColor = (params.length >= 2) ? params[1] : null;
             playerColor = playerColor.toUpperCase();
-            server.joinGame(playerColor, Integer.parseInt(gameID), auth);
+            server.joinGame(playerColor, Integer.parseInt(gameID), auth); // this is where the join game request is made
+            ws.joinPlayer(auth);
             return String.format("Joined Game " + gameID + " as " + playerColor);
         }
         throw new ResponseException(400, "Expected: join <ID> [WHITE|BLACK]<empty>]");
@@ -137,7 +138,7 @@ public class ChessClient {
             String formattedGameName = String.format("%-20s", games[i].gameName()); // Adjust the padding length as needed
             String formattedWhiteUsername = String.format("%-20s", games[i].whiteUsername()); // Adjust the padding length as needed
             String formattedBlackUsername = String.format("%-20s", games[i].blackUsername()); // Adjust the padding length as needed
-            list += (i + 1) + ". " + formattedGameName + "  White: " + formattedWhiteUsername + "  Black: " + formattedBlackUsername + "\n";
+            list += (games[i].gameID()) + ". " + formattedGameName + "  White: " + formattedWhiteUsername + "  Black: " + formattedBlackUsername + "\n";
         }
         return list;
     }

@@ -34,15 +34,11 @@ public class SQLGameDAO implements GameDAO{
         this.gameID = 0;
     }
 
-    public int newGameID() {
-        gameID += 1;
-        return gameID;
-    }
     @Override
     public int createGame(String gameName) throws DataAccessException {
         if(gameName.isEmpty())
             return 0;
-        int gameID = newGameID();
+        int gameID = listGames().size() + 1;
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT game_name FROM game WHERE game_name=?";
             try (var ps = conn.prepareStatement(statement)) {

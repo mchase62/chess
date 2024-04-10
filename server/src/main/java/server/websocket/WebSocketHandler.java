@@ -10,6 +10,9 @@ import spark.Spark;
 import webSocketMessages.Action;
 import dataAccess.*;
 import webSocketMessages.Notification;
+import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.UserGameCommand;
+
 import java.io.IOException;
 import static java.lang.System.exit;
 
@@ -23,12 +26,24 @@ public class WebSocketHandler {
     }
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
-        Action action = new Gson().fromJson(message, Action.class);
-        switch (action.type()) {
-            case ENTER -> enter(action.userName(), session);
-            case EXIT -> exit(action.userName());
+        UserGameCommand userCommand = new Gson().fromJson(message, UserGameCommand.class);
+
+        System.out.println(userCommand.toString());
+        switch (userCommand.getCommandType()) {
+            case JOIN_PLAYER -> joinPlayer(userCommand.getAuthString(), message, session);
+            case JOIN_OBSERVER -> enter("", session);
+            case MAKE_MOVE -> enter("", session);
+            case LEAVE -> enter("", session);
+            case RESIGN -> enter("", session);
         }
     }
+
+    private void joinPlayer(String auth, String message, Session session) throws IOException {
+
+        System.out.println("Inside join player");
+
+    }
+
 
     private void enter(String userName, Session session) throws IOException {
         connections.add(userName, session);
@@ -36,6 +51,8 @@ public class WebSocketHandler {
         var notification = new Notification(Notification.Type.ARRIVAL, message);
         connections.broadcast(userName, notification);
     }
+
+
 
     private void exit(String visitorName) throws IOException {
         connections.remove(visitorName);
