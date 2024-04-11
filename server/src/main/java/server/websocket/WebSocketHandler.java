@@ -1,18 +1,22 @@
 package server.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import handler.ListGamesResponse;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import server.Server;
 import spark.Spark;
 import dataAccess.*;
+import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import java.io.IOException;
+import java.util.Collection;
 
 @WebSocket
 public class WebSocketHandler {
@@ -24,7 +28,6 @@ public class WebSocketHandler {
     }
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
-        System.out.println("Inside onmessage");
 
         UserGameCommand userCommand = new Gson().fromJson(message, UserGameCommand.class);
 //        var conn = connections.getConnection(userCommand.getAuthString(), session);
@@ -44,9 +47,11 @@ public class WebSocketHandler {
     }
 
     private void joinPlayer(String auth, String message, Session session, JoinPlayer joinPlayer) throws IOException {
-        ServerMessage serverMessage;
+        LoadGame loadGame;
         Notification notification;
         String user;
+        String game;
+        int gameID = joinPlayer.getGameID();
 //        connections.remove(auth);
         connections.add(auth, session, joinPlayer.getGameID());
         SQLAuthDAO sqlDAO = new SQLAuthDAO();
@@ -55,10 +60,16 @@ public class WebSocketHandler {
         }catch (Exception e) {
             throw new IOException();
         }
-        System.out.println("This is the user " + user);
-        serverMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        SQLGameDAO sqlGameDAO = new SQLGameDAO();
+        try {
+            game = sqlGameDAO.getGame(gameID);
+        } catch (Exception e) {
+            throw new IOException();
+        }
+        loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
         notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "This is my notification");
         connections.broadcast(auth, notification, joinPlayer.getGameID());
+        connections.broadcast(auth, loadGame, joinPlayer.getGameID());
     }
 
 

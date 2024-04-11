@@ -84,6 +84,24 @@ public class SQLGameDAO implements GameDAO{
         }
     }
 
+    public String getGame(int gameID) throws DataAccessException {
+        String gameJson;
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT game_json FROM game WHERE game_id=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (var rs = ps.executeQuery()) {
+                    if (!rs.next()) { // if game_json returned null, the gameID doesn't exist
+                        return "bad request";
+                    }
+                    else
+                        return rs.getString("game_json");
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("Unable to get user");
+        }
+    }
     @Override
     public String updateGame(String username, String playerColor, int gameID) throws DataAccessException {
         GameData gameData;

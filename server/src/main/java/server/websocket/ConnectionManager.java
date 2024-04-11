@@ -1,7 +1,10 @@
 package server.websocket;
 
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
+import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
+import webSocketMessages.serverMessages.ServerMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,14 +25,23 @@ public class ConnectionManager {
         connections.remove(auth);
     }
 
-    public void broadcast(String excludeAuth, Notification notification, int gameID) throws IOException {
-        System.out.println(notification.toString());
-        System.out.println(excludeAuth);
+    public void broadcast(String excludeAuth, ServerMessage serverMessage, int gameID) throws IOException {
+        switch (serverMessage.getServerMessageType()) {
+            case NOTIFICATION -> serverMessage = new Gson().fromJson(serverMessage.toString(), Notification.class);
+            case LOAD_GAME -> serverMessage = new Gson().fromJson(serverMessage.toString(), LoadGame.class);
+        }
+
+
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                if (!c.auth.equals(excludeAuth)) {
-                    c.send(notification.toString());
+                if (c.gameID == gameID) { // if it's the same game
+                    if (!c.auth.equals(excludeAuth) && serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) { // if not the current player
+                        c.send(serverMessage.toString());
+                    }
+                    if(serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME && c.auth.equals(excludeAuth)) { // if we're loading the game
+                        c.send(serverMessage.toString());
+                    }
                 }
             } else {
                 removeList.add(c);
