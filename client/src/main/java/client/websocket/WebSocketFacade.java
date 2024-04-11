@@ -3,10 +3,10 @@ package client.websocket;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
+import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.UserGameCommand;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.Notification;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -45,15 +45,17 @@ public class WebSocketFacade extends Endpoint {
 
     public void joinPlayer(String auth, int gameID, ChessGame.TeamColor playerColor) throws ResponseException {
         try {
+            ServerMessage serverMessage;
             JoinPlayer gameCommand = new JoinPlayer(auth, gameID, playerColor);
             gameCommand.setCommandType(UserGameCommand.CommandType.JOIN_PLAYER);
             this.session.getBasicRemote().sendText(new Gson().toJson(gameCommand));
+            serverMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
         }  catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());
         }
     }
 
-    public void enterChessServer(String username) throws ResponseException {
+    public void enterChessServer(String auth) throws ResponseException {
         try {
             var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
             this.session.getBasicRemote().sendText(new Gson().toJson(serverMessage));

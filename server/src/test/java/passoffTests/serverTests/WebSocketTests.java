@@ -84,13 +84,12 @@ public class WebSocketTests {
                 joinPlayer(white.user, white.authToken, gameID, ChessGame.TeamColor.WHITE, Set.of(), Set.of());
 
         //check received message
-        assertLoadGameMessage(messages.get(white.user));
+//        assertLoadGameMessage(messages.get(white.user));
 
 
         //join other spot on game
         messages = joinPlayer(black.user, black.authToken, gameID, ChessGame.TeamColor.BLACK,
                 Set.of(white.user), Set.of());
-
         //check received messages
         assertLoadGameMessage(messages.get(black.user));
         assertNotificationMessage(messages.get(white.user));

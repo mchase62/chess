@@ -11,7 +11,7 @@ import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
-import webSocketMessages.Notification;
+import webSocketMessages.serverMessages.Notification;
 
 import static org.junit.jupiter.api.Assertions.*;
 

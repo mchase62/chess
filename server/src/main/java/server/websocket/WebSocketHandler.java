@@ -5,16 +5,14 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import server.Server;
-import server.ServerFacade;
 import spark.Spark;
-import webSocketMessages.Action;
 import dataAccess.*;
-import webSocketMessages.Notification;
+import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import java.io.IOException;
-import static java.lang.System.exit;
 
 @WebSocket
 public class WebSocketHandler {
@@ -26,30 +24,48 @@ public class WebSocketHandler {
     }
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
-        UserGameCommand userCommand = new Gson().fromJson(message, UserGameCommand.class);
+        System.out.println("Inside onmessage");
 
-        switch (userCommand.getCommandType()) {
-            case JOIN_PLAYER -> joinPlayer(userCommand.getAuthString(), message, session);
-            case JOIN_OBSERVER -> enter("", session);
-            case MAKE_MOVE -> enter("", session);
-            case LEAVE -> enter("", session);
-            case RESIGN -> enter("", session);
-        }
+        UserGameCommand userCommand = new Gson().fromJson(message, UserGameCommand.class);
+//        var conn = connections.getConnection(userCommand.getAuthString(), session);
+//        if (conn != null) {
+            switch (userCommand.getCommandType()) {
+                case JOIN_PLAYER ->
+                        joinPlayer(userCommand.getAuthString(), message, session, new Gson().fromJson(message, JoinPlayer.class));
+                case JOIN_OBSERVER -> enter("", session);
+                case MAKE_MOVE -> enter("", session);
+                case LEAVE -> enter("", session);
+                case RESIGN -> enter("", session);
+            }
+//        }
+//        else {
+//            System.out.println("Send error here");
+//        }
     }
 
-    private void joinPlayer(String auth, String message, Session session) throws IOException {
-        connections.add(auth, session);
-        System.out.println("Inside join player");
-
+    private void joinPlayer(String auth, String message, Session session, JoinPlayer joinPlayer) throws IOException {
+        ServerMessage serverMessage;
+        Notification notification;
+        String user;
+//        connections.remove(auth);
+        connections.add(auth, session, joinPlayer.getGameID());
+        SQLAuthDAO sqlDAO = new SQLAuthDAO();
+        try {
+            user = sqlDAO.getUser(auth);
+        }catch (Exception e) {
+            throw new IOException();
+        }
+        System.out.println("This is the user " + user);
+        serverMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "This is my notification");
+        connections.broadcast(auth, notification, joinPlayer.getGameID());
     }
 
 
     private void enter(String userName, Session session) throws IOException {
-
-
         var message = String.format("%s is online", userName);
-        var notification = new Notification(Notification.Type.ARRIVAL, message);
-        connections.broadcast(userName, notification);
+        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
+//        connections.broadcast(userName, notification);
     }
 
 
@@ -57,7 +73,7 @@ public class WebSocketHandler {
     private void exit(String visitorName) throws IOException {
         connections.remove(visitorName);
         var message = String.format("%s is offline", visitorName);
-        var notification = new Notification(Notification.Type.DEPARTURE, message);
-        connections.broadcast(visitorName, notification);
+        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
+//        connections.broadcast(visitorName, notification);
     }
 }

@@ -74,10 +74,9 @@ public class ChessClient {
         if (params.length >= 2) {
             userName = params[0];
             password = params[1];
-
-//            ws.enterChessServer(userName);
             UserData user = new UserData(userName, password,"");
             auth = server.login(user).authToken();
+            ws.enterChessServer(auth);
             state = State.SIGNEDIN;
             return String.format("You logged in as %s.", userName);
         }
