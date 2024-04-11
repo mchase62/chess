@@ -28,7 +28,6 @@ public class WebSocketHandler {
     public void onMessage(Session session, String message) throws IOException {
         UserGameCommand userCommand = new Gson().fromJson(message, UserGameCommand.class);
 
-        System.out.println(userCommand.toString());
         switch (userCommand.getCommandType()) {
             case JOIN_PLAYER -> joinPlayer(userCommand.getAuthString(), message, session);
             case JOIN_OBSERVER -> enter("", session);
@@ -39,14 +38,15 @@ public class WebSocketHandler {
     }
 
     private void joinPlayer(String auth, String message, Session session) throws IOException {
-
+        connections.add(auth, session);
         System.out.println("Inside join player");
 
     }
 
 
     private void enter(String userName, Session session) throws IOException {
-        connections.add(userName, session);
+
+
         var message = String.format("%s is online", userName);
         var notification = new Notification(Notification.Type.ARRIVAL, message);
         connections.broadcast(userName, notification);

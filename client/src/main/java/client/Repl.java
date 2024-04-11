@@ -17,7 +17,7 @@ public class Repl implements NotificationHandler {
         System.out.println(SET_TEXT_COLOR_GREEN + WHITE_KING + " Welcome to 240 chess. Type Help to get started. " + WHITE_KING + "\n");
         System.out.println(SET_TEXT_COLOR_MAGENTA + client.help());
         Scanner scanner = new Scanner(System.in);
-
+            // make server message observer interface with notify function
         var result = "";
 
         while(!result.equals("quit")) {

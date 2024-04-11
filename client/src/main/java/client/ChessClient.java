@@ -60,7 +60,7 @@ public class ChessClient {
             userName = params[0];
             password = params[1];
             String email = params[2];
-            ws = new WebSocketFacade(serverUrl, notificationHandler);
+
 //            ws.enterChessServer(userName);
             UserData newUser = new UserData(userName, password, email);
             server.register(newUser);
@@ -74,8 +74,8 @@ public class ChessClient {
         if (params.length >= 2) {
             userName = params[0];
             password = params[1];
-            ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.enterChessServer(userName);
+
+//            ws.enterChessServer(userName);
             UserData user = new UserData(userName, password,"");
             auth = server.login(user).authToken();
             state = State.SIGNEDIN;
@@ -106,15 +106,24 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws ResponseException {
-        String playerColor = null;
+        ws = new WebSocketFacade(serverUrl, notificationHandler);
+        String playerColor;
+        ChessGame.TeamColor color = null;
         GameData game;
         assertSignedIn();
         if (params.length >= 1) {
             String gameID = params[0];
             playerColor = (params.length >= 2) ? params[1] : null;
-            playerColor = playerColor.toUpperCase();
+            if (playerColor!=null) { // if the player color is not null
+                playerColor = playerColor.toUpperCase();
+                if (playerColor.equals("WHITE"))
+                    color = ChessGame.TeamColor.WHITE;
+                else
+                    color = ChessGame.TeamColor.BLACK;
+            }
+
             server.joinGame(playerColor, Integer.parseInt(gameID), auth); // this is where the join game request is made
-            ws.joinPlayer(auth);
+            ws.joinPlayer(auth, Integer.parseInt(gameID), color);
             return String.format("Joined Game " + gameID + " as " + playerColor);
         }
         throw new ResponseException(400, "Expected: join <ID> [WHITE|BLACK]<empty>]");

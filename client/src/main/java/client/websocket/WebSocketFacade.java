@@ -1,7 +1,9 @@
 package client.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
+import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.UserGameCommand;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.Notification;
@@ -41,13 +43,13 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void joinPlayer(String auth) throws ResponseException {
+    public void joinPlayer(String auth, int gameID, ChessGame.TeamColor playerColor) throws ResponseException {
         try {
-            UserGameCommand gameCommand = new UserGameCommand(auth);
+            JoinPlayer gameCommand = new JoinPlayer(auth, gameID, playerColor);
             gameCommand.setCommandType(UserGameCommand.CommandType.JOIN_PLAYER);
             this.session.getBasicRemote().sendText(new Gson().toJson(gameCommand));
         }  catch (IOException ex) {
-        throw new ResponseException(500, ex.getMessage());
+            throw new ResponseException(500, ex.getMessage());
         }
     }
 
