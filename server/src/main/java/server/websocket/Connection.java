@@ -8,14 +8,19 @@ public class Connection {
     public String auth;
     public Session session;
     public int gameID;
+    String playerColor;
 
-    public Connection(String auth, Session session, int gameID) {
+    public Connection(String auth, Session session, int gameID, String playerColor) {
         this.auth = auth;
         this.session = session;
         this.gameID = gameID;
+        this.playerColor = playerColor;
     }
 
-    public int getGameID(String auth) {
+    public String getPlayerColor() {
+        return playerColor;
+    }
+    public int getGameID() {
         return gameID;
     }
 

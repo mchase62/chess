@@ -9,6 +9,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import server.Server;
 import spark.Spark;
 import dataAccess.*;
+import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -17,6 +18,7 @@ import webSocketMessages.userCommands.UserGameCommand;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
 public class WebSocketHandler {
@@ -52,24 +54,42 @@ public class WebSocketHandler {
         String user;
         String game;
         int gameID = joinPlayer.getGameID();
+        ConcurrentHashMap<String, Connection> connectionMap;
+        boolean valid = true;
+        Error error;
 //        connections.remove(auth);
-        connections.add(auth, session, joinPlayer.getGameID());
-        SQLAuthDAO sqlDAO = new SQLAuthDAO();
-        try {
-            user = sqlDAO.getUser(auth);
-        }catch (Exception e) {
-            throw new IOException();
+        connectionMap = connections.getConnections();
+        for (var c : connectionMap.values()) {
+            // if the player color is taken in that game
+            if(c.getPlayerColor().equals(joinPlayer.getPlayerColor().name()) && c.getGameID() == joinPlayer.getGameID()) {
+                error = new Error(ServerMessage.ServerMessageType.ERROR, "error: already taken");
+                connections.broadcast(auth, error, joinPlayer.getGameID());
+                valid = false;
+                break;
+            }
         }
-        SQLGameDAO sqlGameDAO = new SQLGameDAO();
-        try {
-            game = sqlGameDAO.getGame(gameID);
-        } catch (Exception e) {
-            throw new IOException();
+
+
+
+        if (valid) {
+            connections.add(auth, session, joinPlayer.getGameID(), joinPlayer.getPlayerColor().name());
+            SQLAuthDAO sqlDAO = new SQLAuthDAO();
+            try {
+                user = sqlDAO.getUser(auth);
+            } catch (Exception e) {
+                throw new IOException();
+            }
+            SQLGameDAO sqlGameDAO = new SQLGameDAO();
+            try {
+                game = sqlGameDAO.getGame(gameID);
+            } catch (Exception e) {
+                throw new IOException();
+            }
+            loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
+            notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "This is my notification");
+            connections.broadcast(auth, notification, joinPlayer.getGameID());
+            connections.broadcast(auth, loadGame, joinPlayer.getGameID());
         }
-        loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
-        notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "This is my notification");
-        connections.broadcast(auth, notification, joinPlayer.getGameID());
-        connections.broadcast(auth, loadGame, joinPlayer.getGameID());
     }
 
 

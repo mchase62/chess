@@ -13,11 +13,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
-    public void add(String auth, Session session, int gameID) {
-        var connection = new Connection(auth, session, gameID);
+    public void add(String auth, Session session, int gameID, String playerColor) {
+        var connection = new Connection(auth, session, gameID, playerColor);
         connections.put(auth, connection);
     }
 
+    public ConcurrentHashMap<String, Connection> getConnections() {
+        return connections;
+    }
     public Connection getConnection(String auth, Session session) {
         return connections.get(auth);
     }
