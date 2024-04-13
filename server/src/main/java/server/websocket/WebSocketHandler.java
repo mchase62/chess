@@ -1,8 +1,5 @@
 package server.websocket;
-
-import chess.ChessGame;
 import com.google.gson.Gson;
-import handler.ListGamesResponse;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -13,11 +10,11 @@ import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.JoinObserver;
 import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
@@ -37,7 +34,7 @@ public class WebSocketHandler {
             switch (userCommand.getCommandType()) {
                 case JOIN_PLAYER ->
                         joinPlayer(userCommand.getAuthString(), message, session, new Gson().fromJson(message, JoinPlayer.class));
-                case JOIN_OBSERVER -> enter("", session);
+                case JOIN_OBSERVER -> joinObserver(userCommand.getAuthString(), message, session, new Gson().fromJson(message, JoinObserver.class));
                 case MAKE_MOVE -> enter("", session);
                 case LEAVE -> enter("", session);
                 case RESIGN -> enter("", session);
@@ -47,7 +44,63 @@ public class WebSocketHandler {
 //            System.out.println("Send error here");
 //        }
     }
+    private String getGame(int gameID) throws IOException {
+        SQLGameDAO sqlGameDAO = new SQLGameDAO();
+        try {
+            return sqlGameDAO.getGame(gameID);
+        } catch (Exception e) {
+            throw new IOException();
+        }
+    }
 
+    private String getUser(String auth) throws IOException {
+        SQLAuthDAO sqlDAO = new SQLAuthDAO();
+        try {
+            return sqlDAO.getUser(auth);
+        } catch (Exception e) {
+            throw new IOException();
+        }
+    }
+    private void joinObserver(String auth, String message, Session session, JoinObserver joinObserver) throws IOException {
+        LoadGame loadGame;
+        Notification notification;
+        String game;
+        ConcurrentHashMap<String, Connection> connectionMap;
+        boolean valid = true;
+        Error error;
+        String user;
+
+        int gameID = joinObserver.getGameID();
+        try {
+            game = getGame(gameID);
+        } catch (Exception e) {
+            throw new IOException();
+        }
+        connectionMap = connections.getConnections();
+        for (var c : connectionMap.values()) {
+            if (c.getPlayerColor() == null) {
+                valid = false;
+                error = new Error(ServerMessage.ServerMessageType.ERROR, "error: game doesn't exist");
+                connections.add(auth, session, 0, null);
+                connections.broadcast(auth, error, 0);
+                break;
+            }
+        }
+
+        if (valid) {
+            try {
+                user = getUser(auth);
+            } catch (Exception e) {
+                throw new IOException();
+            }
+
+            connections.add(auth, session, joinObserver.getGameID(), null);
+            loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
+            notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " is observing the game. ");
+            connections.broadcast(auth, notification, joinObserver.getGameID());
+            connections.broadcast(auth, loadGame, joinObserver.getGameID());
+        }
+    }
     private void joinPlayer(String auth, String message, Session session, JoinPlayer joinPlayer) throws IOException {
         LoadGame loadGame;
         Notification notification;
@@ -57,9 +110,8 @@ public class WebSocketHandler {
         ConcurrentHashMap<String, Connection> connectionMap;
         boolean valid = true;
         Error error;
-        SQLGameDAO sqlGameDAO = new SQLGameDAO();
         try {
-            game = sqlGameDAO.getGame(gameID);
+            game = getGame(gameID);
         } catch (Exception e) {
             throw new IOException();
         }

@@ -3,8 +3,8 @@ package client.websocket;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
-import model.GameData;
 import webSocketMessages.serverMessages.Notification;
+import webSocketMessages.userCommands.JoinObserver;
 import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.UserGameCommand;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -48,6 +48,16 @@ public class WebSocketFacade extends Endpoint {
         try {
             JoinPlayer gameCommand = new JoinPlayer(auth, gameID, playerColor);
             gameCommand.setCommandType(UserGameCommand.CommandType.JOIN_PLAYER);
+            this.session.getBasicRemote().sendText(new Gson().toJson(gameCommand));
+        }  catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void joinObserver(String auth, int gameID) throws ResponseException {
+        try {
+            JoinObserver gameCommand = new JoinObserver(auth, gameID);
+            gameCommand.setCommandType(UserGameCommand.CommandType.JOIN_OBSERVER);
             this.session.getBasicRemote().sendText(new Gson().toJson(gameCommand));
         }  catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());

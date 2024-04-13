@@ -8,7 +8,6 @@ import server.ServerFacade;
 import client.websocket.NotificationHandler;
 import java.util.Arrays;
 import exception.ResponseException;
-import ui.TicTacToe;
 
 public class ChessClient {
     private String userName = null;
@@ -133,6 +132,7 @@ public class ChessClient {
         if (params.length >= 1) {
             String gameID = params[0];
             server.joinGame(null, Integer.parseInt(gameID), auth);
+            ws.joinObserver(auth, Integer.parseInt(gameID));
             return String.format("Observing Game " + gameID);
         }
         throw new ResponseException(400, "Expected: observe <ID>");
