@@ -64,16 +64,20 @@ public class WebSocketHandler {
             throw new IOException();
         }
 
-//        connections.remove(auth);
-
-
         connectionMap = connections.getConnections();
         for (var c : connectionMap.values()) {
+            if (c.getPlayerColor() == null) {
+                valid = false;
+                error = new Error(ServerMessage.ServerMessageType.ERROR, "error: game doesn't exist");
+                connections.add(auth, session, 0, null);
+                connections.broadcast(auth, error, 0);
+                break;
+            }
             // if the player color is taken in that game
-            if(c.getPlayerColor().equals(joinPlayer.getPlayerColor().name()) && c.getGameID() == joinPlayer.getGameID()) {
+            else if(c.getPlayerColor().equals(joinPlayer.getPlayerColor().name()) && c.getGameID() == joinPlayer.getGameID()) {
                 error = new Error(ServerMessage.ServerMessageType.ERROR, "error: already taken");
                 connections.add(auth, session, 0, null);
-                connections.broadcast(auth, error, joinPlayer.getGameID());
+                connections.broadcast(auth, error, 0);
                 valid = false;
                 break;
             }
@@ -88,7 +92,7 @@ public class WebSocketHandler {
             }
             connections.add(auth, session, joinPlayer.getGameID(), joinPlayer.getPlayerColor().name());
             loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
-            notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "This is my notification");
+            notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " joined the game as " + joinPlayer.getPlayerColor().name());
             connections.broadcast(auth, notification, joinPlayer.getGameID());
             connections.broadcast(auth, loadGame, joinPlayer.getGameID());
         }
