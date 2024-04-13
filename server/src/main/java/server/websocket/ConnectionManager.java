@@ -5,7 +5,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
-
+import webSocketMessages.serverMessages.Error;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,12 +32,15 @@ public class ConnectionManager {
         switch (serverMessage.getServerMessageType()) {
             case NOTIFICATION -> serverMessage = new Gson().fromJson(serverMessage.toString(), Notification.class);
             case LOAD_GAME -> serverMessage = new Gson().fromJson(serverMessage.toString(), LoadGame.class);
+            case ERROR -> serverMessage = new Gson().fromJson(serverMessage.toString(), Error.class);
         }
-
 
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
+                if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.ERROR && c.auth.equals(excludeAuth)) { // if this is an error message
+                    c.send(serverMessage.toString());
+                }
                 if (c.gameID == gameID) { // if it's the same game
                     if (!c.auth.equals(excludeAuth) && serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) { // if not the current player
                         c.send(serverMessage.toString());
@@ -52,8 +55,8 @@ public class ConnectionManager {
         }
 
         // Clean up any connections that were left open.
-        for (var c : removeList) {
-            connections.remove(c.auth);
-        }
+//        for (var c : removeList) {
+//            connections.remove(c.auth);
+//        }
     }
 }

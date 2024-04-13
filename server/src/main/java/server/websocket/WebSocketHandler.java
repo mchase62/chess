@@ -57,34 +57,36 @@ public class WebSocketHandler {
         ConcurrentHashMap<String, Connection> connectionMap;
         boolean valid = true;
         Error error;
+        SQLGameDAO sqlGameDAO = new SQLGameDAO();
+        try {
+            game = sqlGameDAO.getGame(gameID);
+        } catch (Exception e) {
+            throw new IOException();
+        }
+
 //        connections.remove(auth);
+
+
         connectionMap = connections.getConnections();
         for (var c : connectionMap.values()) {
             // if the player color is taken in that game
             if(c.getPlayerColor().equals(joinPlayer.getPlayerColor().name()) && c.getGameID() == joinPlayer.getGameID()) {
                 error = new Error(ServerMessage.ServerMessageType.ERROR, "error: already taken");
+                connections.add(auth, session, 0, null);
                 connections.broadcast(auth, error, joinPlayer.getGameID());
                 valid = false;
                 break;
             }
         }
 
-
-
         if (valid) {
-            connections.add(auth, session, joinPlayer.getGameID(), joinPlayer.getPlayerColor().name());
             SQLAuthDAO sqlDAO = new SQLAuthDAO();
             try {
                 user = sqlDAO.getUser(auth);
             } catch (Exception e) {
                 throw new IOException();
             }
-            SQLGameDAO sqlGameDAO = new SQLGameDAO();
-            try {
-                game = sqlGameDAO.getGame(gameID);
-            } catch (Exception e) {
-                throw new IOException();
-            }
+            connections.add(auth, session, joinPlayer.getGameID(), joinPlayer.getPlayerColor().name());
             loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
             notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "This is my notification");
             connections.broadcast(auth, notification, joinPlayer.getGameID());
