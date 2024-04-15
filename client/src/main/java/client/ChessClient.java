@@ -1,6 +1,9 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import client.websocket.WebSocketFacade;
 import model.GameData;
 import model.UserData;
@@ -17,6 +20,7 @@ public class ChessClient {
     private final String serverUrl;
     private final NotificationHandler notificationHandler;
     private State state = State.SIGNEDOUT;
+    private GameState gameState = GameState.OUTGAME;
     private WebSocketFacade ws;
 
     public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
@@ -107,7 +111,6 @@ public class ChessClient {
         ws = new WebSocketFacade(serverUrl, notificationHandler);
         String playerColor;
         ChessGame.TeamColor color = null;
-        GameData game;
         assertSignedIn();
         if (params.length >= 1) {
             String gameID = params[0];
@@ -122,6 +125,7 @@ public class ChessClient {
 
             server.joinGame(playerColor, Integer.parseInt(gameID), auth); // this is where the join game request is made
             ws.joinPlayer(auth, Integer.parseInt(gameID), color);
+            gameState = GameState.INGAME;
             return String.format("Joined Game " + gameID + " as " + playerColor);
         }
         throw new ResponseException(400, "Expected: join <ID> [WHITE|BLACK]<empty>]");
@@ -151,6 +155,77 @@ public class ChessClient {
         return list;
     }
 
+    public ChessPosition getPosition(String input) throws ResponseException {
+        boolean isValidRow = false;
+        boolean isValidCol = false;
+        char[] validCol = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+        char[] validRow = {'1', '2', '3', '4', '5', '6', '7', '8'};
+        for (char valid : validRow) {
+            if (valid == input.charAt(1)) {
+                isValidRow = true;
+                break;
+            }
+        }
+        for (char valid : validCol) {
+            if (valid == input.charAt(0)) {
+                isValidCol = true;
+                break;
+            }
+        }
+
+        if(!isValidRow || !isValidCol) { // if the move input isn't what we expected
+            throw new ResponseException(400, "Expected: <Letter><Number> <Letter><Number> <Promotion Piece>");
+        }
+
+        int col = 0;
+        int row;
+        row = Integer.parseInt(String.valueOf(input.charAt(1)));
+        switch (input.charAt(0)) {
+            case 'a' -> col = 1;
+            case 'b' -> col = 2;
+            case 'c' -> col = 3;
+            case 'd' -> col = 4;
+            case 'e' -> col = 5;
+            case 'f' -> col = 6;
+            case 'g' -> col = 7;
+            case 'h' -> col = 8;
+        }
+        return new ChessPosition(row, col);
+    }
+    public String makeMove(String... params) throws ResponseException {
+        assertSignedIn();
+        assertInGame();
+        String startInput;
+        String endInput;
+        ChessPiece.PieceType promotionPiece = null;
+        String promotion;
+        ChessPosition start;
+        ChessPosition end;
+        if(params.length >= 2) {
+            startInput = params[0];
+            endInput = params[1];
+
+            start = getPosition(startInput);
+            end = getPosition(endInput);
+
+            if (params.length == 3) { // if a promotion piece is included
+                promotion = params[2].toLowerCase();
+                switch (promotion) {
+                    case "queen" -> promotionPiece = ChessPiece.PieceType.QUEEN;
+                    case "rook" -> promotionPiece = ChessPiece.PieceType.ROOK;
+                    case "knight" -> promotionPiece = ChessPiece.PieceType.KNIGHT;
+                    case "bishop" -> promotionPiece = ChessPiece.PieceType.BISHOP;
+                }
+            }
+        }
+        else // if there wasn't enough parameters
+            throw new ResponseException(400, "Expected: <Letter><Number> <Letter><Number> <Promotion Piece>");
+
+        ChessMove move = new ChessMove(start, end, promotionPiece);
+
+        throw new ResponseException(400, "Expected: <Letter><Number> <Letter><Number> <Promotion Piece>");
+    }
+
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
@@ -174,5 +249,10 @@ public class ChessClient {
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT)
             throw new ResponseException(400, "You must sign in");
+    }
+    private void assertInGame() throws ResponseException {
+        if (gameState == GameState.OUTGAME) {
+            throw new ResponseException(400, "You must enter a game");
+        }
     }
 }

@@ -28,7 +28,7 @@ public class ConnectionManager {
         connections.remove(auth);
     }
 
-    public void broadcast(String excludeAuth, ServerMessage serverMessage, int gameID) throws IOException {
+    public void broadcastJoinObserve(String excludeAuth, ServerMessage serverMessage, int gameID) throws IOException {
         switch (serverMessage.getServerMessageType()) {
             case NOTIFICATION -> serverMessage = new Gson().fromJson(serverMessage.toString(), Notification.class);
             case LOAD_GAME -> serverMessage = new Gson().fromJson(serverMessage.toString(), LoadGame.class);

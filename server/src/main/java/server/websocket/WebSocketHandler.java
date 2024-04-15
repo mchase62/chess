@@ -44,6 +44,10 @@ public class WebSocketHandler {
 //            System.out.println("Send error here");
 //        }
     }
+
+    public void makeMove() {
+
+    }
     private String getGame(int gameID) throws IOException {
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         try {
@@ -82,7 +86,7 @@ public class WebSocketHandler {
                 valid = false;
                 error = new Error(ServerMessage.ServerMessageType.ERROR, "error: game doesn't exist");
                 connections.add(auth, session, 0, null);
-                connections.broadcast(auth, error, 0);
+                connections.broadcastJoinObserve(auth, error, 0);
                 break;
             }
         }
@@ -97,8 +101,8 @@ public class WebSocketHandler {
             connections.add(auth, session, joinObserver.getGameID(), null);
             loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
             notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " is observing the game. ");
-            connections.broadcast(auth, notification, joinObserver.getGameID());
-            connections.broadcast(auth, loadGame, joinObserver.getGameID());
+            connections.broadcastJoinObserve(auth, notification, joinObserver.getGameID());
+            connections.broadcastJoinObserve(auth, loadGame, joinObserver.getGameID());
         }
     }
     private void joinPlayer(String auth, String message, Session session, JoinPlayer joinPlayer) throws IOException {
@@ -122,14 +126,14 @@ public class WebSocketHandler {
                 valid = false;
                 error = new Error(ServerMessage.ServerMessageType.ERROR, "error: game doesn't exist");
                 connections.add(auth, session, 0, null);
-                connections.broadcast(auth, error, 0);
+                connections.broadcastJoinObserve(auth, error, 0);
                 break;
             }
             // if the player color is taken in that game
             else if(c.getPlayerColor().equals(joinPlayer.getPlayerColor().name()) && c.getGameID() == joinPlayer.getGameID()) {
                 error = new Error(ServerMessage.ServerMessageType.ERROR, "error: already taken");
                 connections.add(auth, session, 0, null);
-                connections.broadcast(auth, error, 0);
+                connections.broadcastJoinObserve(auth, error, 0);
                 valid = false;
                 break;
             }
@@ -145,8 +149,8 @@ public class WebSocketHandler {
             connections.add(auth, session, joinPlayer.getGameID(), joinPlayer.getPlayerColor().name());
             loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
             notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " joined the game as " + joinPlayer.getPlayerColor().name());
-            connections.broadcast(auth, notification, joinPlayer.getGameID());
-            connections.broadcast(auth, loadGame, joinPlayer.getGameID());
+            connections.broadcastJoinObserve(auth, notification, joinPlayer.getGameID());
+            connections.broadcastJoinObserve(auth, loadGame, joinPlayer.getGameID());
         }
     }
 
