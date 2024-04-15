@@ -1,5 +1,6 @@
 package server.websocket;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -12,9 +13,12 @@ import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.JoinObserver;
 import webSocketMessages.userCommands.JoinPlayer;
+import webSocketMessages.userCommands.MakeMove;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
@@ -35,7 +39,7 @@ public class WebSocketHandler {
                 case JOIN_PLAYER ->
                         joinPlayer(userCommand.getAuthString(), message, session, new Gson().fromJson(message, JoinPlayer.class));
                 case JOIN_OBSERVER -> joinObserver(userCommand.getAuthString(), message, session, new Gson().fromJson(message, JoinObserver.class));
-                case MAKE_MOVE -> enter("", session);
+                case MAKE_MOVE -> makeMove(userCommand.getAuthString(), message, session, new Gson().fromJson(message, MakeMove.class));
                 case LEAVE -> enter("", session);
                 case RESIGN -> enter("", session);
             }
@@ -45,13 +49,28 @@ public class WebSocketHandler {
 //        }
     }
 
-    public void makeMove() {
-
+    public void makeMove(String auth, String message, Session session, MakeMove move) throws IOException {
+        SQLGameDAO sqlGameDAO = new SQLGameDAO();
+        int gameID = move.getGameID();
+//        try {
+//            return sqlGameDAO.getGame(gameID);
+//        } catch (Exception e) {
+//            throw new IOException();
+//        }
     }
     private String getGame(int gameID) throws IOException {
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         try {
             return sqlGameDAO.getGame(gameID);
+        } catch (Exception e) {
+            throw new IOException();
+        }
+    }
+
+    private String[] getUsers(int gameID) throws IOException {
+        SQLGameDAO sqlGameDAO = new SQLGameDAO();
+        try {
+            return sqlGameDAO.getUsers(gameID);
         } catch (Exception e) {
             throw new IOException();
         }
@@ -70,7 +89,7 @@ public class WebSocketHandler {
         Notification notification;
         String game;
         ConcurrentHashMap<String, Connection> connectionMap;
-        boolean valid = true;
+        boolean valid = false;
         Error error;
         String user;
 
@@ -80,13 +99,12 @@ public class WebSocketHandler {
         } catch (Exception e) {
             throw new IOException();
         }
+
         connectionMap = connections.getConnections();
+        // go through map and check if a connection has the game id
         for (var c : connectionMap.values()) {
-            if (c.getPlayerColor() == null) {
-                valid = false;
-                error = new Error(ServerMessage.ServerMessageType.ERROR, "error: game doesn't exist");
-                connections.add(auth, session, 0, null);
-                connections.broadcastJoinObserve(auth, error, 0);
+            if (gameID == c.getGameID()) { // game exists
+                valid = true;
                 break;
             }
         }
@@ -97,60 +115,89 @@ public class WebSocketHandler {
             } catch (Exception e) {
                 throw new IOException();
             }
-
+            Connection observeConnection = new Connection(auth, session, joinObserver.getGameID(), null);
             connections.add(auth, session, joinObserver.getGameID(), null);
             loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
             notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " is observing the game. ");
             connections.broadcastJoinObserve(auth, notification, joinObserver.getGameID());
-            connections.broadcastJoinObserve(auth, loadGame, joinObserver.getGameID());
+            observeConnection.send(loadGame.toString());
+//            connections.broadcastJoinObserve(auth, loadGame, joinObserver.getGameID());
+        }
+        else {
+            error = new Error(ServerMessage.ServerMessageType.ERROR, "error: game doesn't exist");
+            // change to send from connection class
+            Connection errorConnection = new Connection(auth, session, 0, null);
+            errorConnection.send(error.toString());
         }
     }
     private void joinPlayer(String auth, String message, Session session, JoinPlayer joinPlayer) throws IOException {
         LoadGame loadGame;
         Notification notification;
+        String[] users;
         String user;
         String game;
         int gameID = joinPlayer.getGameID();
         ConcurrentHashMap<String, Connection> connectionMap;
-        boolean valid = true;
+        boolean valid = false;
         Error error;
         try {
             game = getGame(gameID);
         } catch (Exception e) {
             throw new IOException();
         }
-
-        connectionMap = connections.getConnections();
-        for (var c : connectionMap.values()) {
-            if (c.getPlayerColor() == null) {
-                valid = false;
-                error = new Error(ServerMessage.ServerMessageType.ERROR, "error: game doesn't exist");
-                connections.add(auth, session, 0, null);
-                connections.broadcastJoinObserve(auth, error, 0);
-                break;
-            }
-            // if the player color is taken in that game
-            else if(c.getPlayerColor().equals(joinPlayer.getPlayerColor().name()) && c.getGameID() == joinPlayer.getGameID()) {
-                error = new Error(ServerMessage.ServerMessageType.ERROR, "error: already taken");
-                connections.add(auth, session, 0, null);
-                connections.broadcastJoinObserve(auth, error, 0);
-                valid = false;
-                break;
-            }
+        if (!game.equals("bad request")) {
+            valid = true;
+        }
+        System.out.println(game);
+        try {
+            users = getUsers(gameID);
+        } catch (Exception e) {
+            throw new IOException();
         }
 
-        if (valid) {
-            SQLAuthDAO sqlDAO = new SQLAuthDAO();
-            try {
-                user = sqlDAO.getUser(auth);
-            } catch (Exception e) {
-                throw new IOException();
+        if(users.length > 1) {
+            if (users[0] == null && users[1] == null) {
+                error = new Error(ServerMessage.ServerMessageType.ERROR, "error: empty team");
+                Connection errorConnection = new Connection(auth, session, 0, null);
+                errorConnection.send(error.toString());
+                return;
             }
+        }
+        connectionMap = connections.getConnections();
+        for (var c : connectionMap.values()) { // if there are already other connections
+            if(c.getGameID() == joinPlayer.getGameID() && c.getPlayerColor()!=null) { // this is not an observer
+                // if the player color is taken in that game
+                if (c.getPlayerColor().equals(joinPlayer.getPlayerColor().name()) && c.getGameID() == joinPlayer.getGameID()) {
+                    error = new Error(ServerMessage.ServerMessageType.ERROR, "error: already taken");
+                    Connection errorConnection = new Connection(auth, session, 0, null);
+                    errorConnection.send(error.toString());
+                    return;
+                }
+            }
+        }
+        SQLAuthDAO sqlDAO = new SQLAuthDAO();
+        try {
+            user = sqlDAO.getUser(auth);
+        } catch (Exception e) {
+            throw new IOException();
+        }
+        if(user==null) {
+            error = new Error(ServerMessage.ServerMessageType.ERROR, "error: invalid auth token");
+            Connection errorConnection = new Connection(auth, session, 0, null);
+            errorConnection.send(error.toString());
+            return;
+        }
+        if (valid) {
             connections.add(auth, session, joinPlayer.getGameID(), joinPlayer.getPlayerColor().name());
             loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
             notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " joined the game as " + joinPlayer.getPlayerColor().name());
             connections.broadcastJoinObserve(auth, notification, joinPlayer.getGameID());
             connections.broadcastJoinObserve(auth, loadGame, joinPlayer.getGameID());
+        }
+        else {
+            error = new Error(ServerMessage.ServerMessageType.ERROR, "error: game doesn't exist");
+            Connection errorConnection = new Connection(auth, session, 0, null);
+            errorConnection.send(error.toString());
         }
     }
 

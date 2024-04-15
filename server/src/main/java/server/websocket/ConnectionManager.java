@@ -32,7 +32,6 @@ public class ConnectionManager {
         switch (serverMessage.getServerMessageType()) {
             case NOTIFICATION -> serverMessage = new Gson().fromJson(serverMessage.toString(), Notification.class);
             case LOAD_GAME -> serverMessage = new Gson().fromJson(serverMessage.toString(), LoadGame.class);
-            case ERROR -> serverMessage = new Gson().fromJson(serverMessage.toString(), Error.class);
         }
 
         var removeList = new ArrayList<Connection>();

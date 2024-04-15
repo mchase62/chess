@@ -13,6 +13,7 @@ import java.util.Arrays;
 import exception.ResponseException;
 
 public class ChessClient {
+    private String gameID = null;
     private String userName = null;
     private String password = null;
     private String auth = null;
@@ -113,7 +114,7 @@ public class ChessClient {
         ChessGame.TeamColor color = null;
         assertSignedIn();
         if (params.length >= 1) {
-            String gameID = params[0];
+            gameID = params[0];
             playerColor = (params.length >= 2) ? params[1] : null;
             if (playerColor!=null) { // if the player color is not null
                 playerColor = playerColor.toUpperCase();
@@ -222,7 +223,7 @@ public class ChessClient {
             throw new ResponseException(400, "Expected: <Letter><Number> <Letter><Number> <Promotion Piece>");
 
         ChessMove move = new ChessMove(start, end, promotionPiece);
-
+        ws.makeMove(auth, Integer.parseInt(gameID), move);
         throw new ResponseException(400, "Expected: <Letter><Number> <Letter><Number> <Promotion Piece>");
     }
 
@@ -233,6 +234,15 @@ public class ChessClient {
                     login <USERNAME> <PASSWORD> - to play chess
                     quit - playing chess
                     help - with possible commands
+                    """;
+        }
+        else if (gameState == GameState.INGAME) {
+            return """
+                    redraw - redraws chessboard
+                    leave - leaves current game
+                    make move <Letter><Number> <Letter><Number> <Promotion Piece>
+                    resign - resign from current game
+                    highlight moves <Letter><Number> - highlights all legal moves for position selected
                     """;
         }
         return """
