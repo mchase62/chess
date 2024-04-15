@@ -64,8 +64,8 @@ public class SQLAuthDAO implements AuthDAO{
         if (getUser(auth)==null)  // if the auth doesn't exist at the beginning
             return "fail";
         try (var conn = DatabaseManager.getConnection()) {
-            var delete_statement = "DELETE FROM auth WHERE auth_token=?";
-            try (var ps = conn.prepareStatement(delete_statement)) {
+            var deleteStatement = "DELETE FROM auth WHERE auth_token=?";
+            try (var ps = conn.prepareStatement(deleteStatement)) {
                 ps.setString(1,auth);
                 ps.execute();
             }
@@ -87,8 +87,8 @@ public class SQLAuthDAO implements AuthDAO{
         boolean userExists;
         // check if user exists in user table
         try (var conn = DatabaseManager.getConnection()) {
-            var first_check_statement = "SELECT username FROM user WHERE username=?";
-            try (var ps = conn.prepareStatement(first_check_statement)) {
+            var firstCheckStatement = "SELECT username FROM user WHERE username=?";
+            try (var ps = conn.prepareStatement(firstCheckStatement)) {
                 ps.setString(1, username);
                 try (var rs = ps.executeQuery()) {
                     if (!rs.next()) { // return null if the username doesn't exist in user

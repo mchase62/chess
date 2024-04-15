@@ -50,14 +50,14 @@ public class ChessBoard {
     }
 
     private static void drawHeaders(PrintStream out, String teamColor) {
-        String[] white_headers = { "h", "g", "f", "e", "d", "c", "b", "a" };
-        String[] black_headers = { "a", "b", "c", "d", "e", "f", "g", "h" };
+        String[] whiteHeaders = { "h", "g", "f", "e", "d", "c", "b", "a" };
+        String[] blackHeaders = { "a", "b", "c", "d", "e", "f", "g", "h" };
         String[] headers;
         setBlack(out);
         if (teamColor.equals("WHITE"))
-            headers = white_headers;
+            headers = whiteHeaders;
         else
-            headers = black_headers;
+            headers = blackHeaders;
 
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);

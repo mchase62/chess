@@ -49,10 +49,10 @@ public class ServerFacade {
 
     public GameData[] listGames(String auth) throws ResponseException {
         var path = "/game";
-        record listGameResponse(GameData[] games, String[] whiteUsernames, String[] blackUsernames) {
+        record ListGameResponse(GameData[] games, String[] whiteUsernames, String[] blackUsernames) {
 
         }
-        var response = this.makeRequest("GET", path, null, listGameResponse.class, auth);
+        var response = this.makeRequest("GET", path, null, ListGameResponse.class, auth);
         return response.games();
     }
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String header) throws ResponseException {

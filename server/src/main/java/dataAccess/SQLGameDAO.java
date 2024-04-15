@@ -48,8 +48,8 @@ public class SQLGameDAO implements GameDAO{
                         ChessGame chessGame = new ChessGame();
                         GameData gameData = new GameData(gameID, null, null, gameName,chessGame);
                         var json = new Gson().toJson(gameData);
-                        var insert_statement = "INSERT INTO game (game_id, game_name, game_json) values (?,?,?)";
-                        int returnedGameID =  DatabaseManager.executeUpdate(insert_statement, gameID, gameName, json); // returns 0 if game was not made
+                        var insertStatement = "INSERT INTO game (game_id, game_name, game_json) values (?,?,?)";
+                        int returnedGameID =  DatabaseManager.executeUpdate(insertStatement, gameID, gameName, json); // returns 0 if game was not made
                         if (returnedGameID != 0) // return the game id if successful
                             return gameID;
                     }
