@@ -108,7 +108,18 @@ public class WebSocketHandler {
                 break;
             }
         }
-
+        SQLAuthDAO sqlDAO = new SQLAuthDAO();
+        try {
+            user = sqlDAO.getUser(auth);
+        } catch (Exception e) {
+            throw new IOException();
+        }
+        if(user==null) {
+            error = new Error(ServerMessage.ServerMessageType.ERROR, "error: invalid auth token");
+            Connection errorConnection = new Connection(auth, session, 0, null);
+            errorConnection.send(error.toString());
+            return;
+        }
         if (valid) {
             try {
                 user = getUser(auth);
@@ -148,7 +159,6 @@ public class WebSocketHandler {
         if (!game.equals("bad request")) {
             valid = true;
         }
-        System.out.println(game);
         try {
             users = getUsers(gameID);
         } catch (Exception e) {
