@@ -235,8 +235,8 @@ public class WebSocketHandler {
             throw new IOException();
         }
         if(user==null) {
-            error = new Error(ServerMessage.ServerMessageType.ERROR, "error: invalid auth token");
             Connection errorConnection = new Connection(auth, session, 0, null);
+            error = new Error(ServerMessage.ServerMessageType.ERROR, "error: invalid auth token");
             errorConnection.send(error.toString());
             return;
         }
