@@ -71,7 +71,22 @@ public class WebSocketHandler {
     public void leave(String auth, String message, Session session, Leave leave) throws IOException {
         int gameID = connections.getConnection(auth, session).getGameID();
         String user = getUser(auth);
+        String playerColor=null;
+        System.out.println("HERE");
+        if(connections.getConnection(auth, session) != null) {
+            playerColor = connections.getConnection(auth, session).getPlayerColor();
+        }
+
         connections.remove(auth);
+        SQLGameDAO sqlGameDAO = new SQLGameDAO();
+        try {
+            System.out.println("UPDATING THE GAME");
+            System.out.println(playerColor);
+            sqlGameDAO.leaveGame(playerColor, gameID);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            throw new IOException();
+        }
         Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " left the game");
         connections.broadcastJoinObserve(auth, notification, gameID);
     }

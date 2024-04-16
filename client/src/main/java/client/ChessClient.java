@@ -61,6 +61,7 @@ public class ChessClient {
                 case "join" -> joinGame(params);
                 case "list" -> listGames();
                 case "make move" -> makeMove(params);
+                case "leave" -> leave(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -88,7 +89,6 @@ public class ChessClient {
             password = params[1];
             UserData user = new UserData(userName, password,"");
             auth = server.login(user).authToken();
-            ws.enterChessServer(auth);
             state = State.SIGNEDIN;
             return String.format("You logged in as %s.", userName);
         }
@@ -98,7 +98,6 @@ public class ChessClient {
     public String logOut() throws ResponseException {
         assertSignedIn();
         server.logout(auth);
-        ws.leaveChessServer(userName);
         ws = null;
         state = State.SIGNEDOUT;
         return String.format("%s logged out.", userName);
@@ -229,14 +228,19 @@ public class ChessClient {
         }
         else // if there wasn't enough parameters
             throw new ResponseException(400, "Expected: <Letter><Number> <Letter><Number> <Promotion Piece>");
-
-        ChessMove move = new ChessMove(start, end, promotionPiece);
-        ws.makeMove(auth, Integer.parseInt(gameID), move);
-        throw new ResponseException(400, "Expected: <Letter><Number> <Letter><Number> <Promotion Piece>");
+        try {
+            ChessMove move = new ChessMove(start, end, promotionPiece);
+            ws.makeMove(auth, Integer.parseInt(gameID), move);
+        }
+        catch(Exception e) {
+            throw new ResponseException(400, e.toString());
+        }
+        return "made move";
     }
 
     public String leave(String... params) throws ResponseException {
         ws.leave(auth, Integer.parseInt(gameID));
+        gameState = GameState.OUTGAME;
         return "Left Game";
     }
 

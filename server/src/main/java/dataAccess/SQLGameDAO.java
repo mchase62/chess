@@ -123,6 +123,40 @@ public class SQLGameDAO implements GameDAO{
         }
 
     }
+    public String leaveGame(String playerColor, int gameID) throws DataAccessException {
+        GameData gameData;
+        String white;
+        String black;
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT game_json FROM game WHERE game_id=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (var rs = ps.executeQuery()) {
+                    if (!rs.next()) { // if game_json returned null, the gameID doesn't exist
+                        return "bad request";
+                    } else if (playerColor == null) {
+                        return "success";
+                    } else {
+                        String gameJson = rs.getString("game_json");
+                        gameData = new Gson().fromJson(gameJson, GameData.class);//entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername()
+                        white = gameData.whiteUsername();
+                        black = gameData.blackUsername();
+                        if (playerColor.equals("WHITE")) // if player chose white and it's not taken
+                            white = null;
+                        else
+                            black = null;
+                        GameData newGameData = new GameData(gameData.gameID(), white, black, gameData.gameName(), gameData.game());
+                        var json = new Gson().toJson(newGameData);
+                        var updateStatement = "UPDATE game SET white_username = ?, black_username = ?, game_json =? where game_id = ?";
+                        DatabaseManager.executeUpdate(updateStatement, white, black, json, gameID); // returns 0 if game was not made
+                        return "success";
+                    }
+                }
+            }
+        }catch (Exception e) {
+            throw new DataAccessException("Unable to get user");
+        }
+    }
     @Override
     public String updateGame(String username, String playerColor, int gameID) throws DataAccessException {
         GameData gameData;
