@@ -78,7 +78,7 @@ public class WebSocketHandler {
             chessGame.setBoard(newBoard);
         }
         if (connections.getConnection(auth, session) == null) { // an observer
-            Error error = new Error(ServerMessage.ServerMessageType.ERROR, "error: not player's turn");
+            Error error = new Error(ServerMessage.ServerMessageType.ERROR, "error: observer cannot make move");
             Connection newConnection = new Connection(auth, session, gameID, null);
             newConnection.send(error.toString()); // send to current as well
             return;
@@ -207,9 +207,8 @@ public class WebSocketHandler {
                 break;
             }
         }
-        SQLAuthDAO sqlDAO = new SQLAuthDAO();
         try {
-            user = sqlDAO.getUser(auth);
+            user = getUserAuth(auth);
         } catch (Exception e) {
             throw new IOException();
         }
@@ -284,9 +283,9 @@ public class WebSocketHandler {
                 }
             }
         }
-        SQLAuthDAO sqlDAO = new SQLAuthDAO();
+
         try {
-            user = sqlDAO.getUser(auth);
+            user = getUserAuth(auth);
         } catch (Exception e) {
             throw new IOException();
         }
@@ -308,6 +307,15 @@ public class WebSocketHandler {
             error = new Error(ServerMessage.ServerMessageType.ERROR, "error: game doesn't exist");
             Connection errorConnection = new Connection(auth, session, 0, null);
             errorConnection.send(error.toString());
+        }
+    }
+
+    private static String getUserAuth(String auth) throws IOException {
+        SQLAuthDAO sqlDAO = new SQLAuthDAO();
+        try {
+            return sqlDAO.getUser(auth);
+        } catch (Exception e) {
+            throw new IOException();
         }
     }
 }

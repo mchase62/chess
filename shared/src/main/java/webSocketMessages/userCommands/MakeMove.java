@@ -18,10 +18,6 @@ public class MakeMove extends UserGameCommand {
         return gameID;
     }
 
-    public void setGameID(int gameID) {
-        this.gameID = gameID;
-    }
-
     public ChessMove getMove() {
         return move;
     }
