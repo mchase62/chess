@@ -80,6 +80,18 @@ public class WebSocketHandler {
             newBoard.resetBoard();
             chessGame.setBoard(newBoard);
         }
+        if (connections.getConnection(auth, session) == null) { // an observer
+            Error error = new Error(ServerMessage.ServerMessageType.ERROR, "error: not player's turn");
+            Connection newConnection = new Connection(auth, session, gameID, null);
+            newConnection.send(error.toString()); // send to current as well
+            return;
+        }
+        else if(!chessGame.getTeamTurn().toString().equals(connections.getConnection(auth, session).getPlayerColor())) { // check if our turn
+            Error error = new Error(ServerMessage.ServerMessageType.ERROR, "error: not player's turn");
+            Connection newConnection = new Connection(auth, session, gameID, null);
+            newConnection.send(error.toString()); // send to current as well
+            return;
+        }
         for (ChessMove validMove : chessGame.validMoves(start)) {
             if(validMove.equals(chessMove)) {
                 valid = true;
@@ -117,9 +129,9 @@ public class WebSocketHandler {
             connections.broadcastMakeMove(auth, loadGame, gameID);
         }
         else { // not a valid move
-            Error error = new Error(ServerMessage.ServerMessageType.ERROR, "Not a valid move");
+            Error error = new Error(ServerMessage.ServerMessageType.ERROR, "error: not a valid move");
             Connection newConnection = new Connection(auth, session, gameID, null);
-            newConnection.send(error.toString()); // send to current as well
+            newConnection.send(error.toString());
         }
     }
 
