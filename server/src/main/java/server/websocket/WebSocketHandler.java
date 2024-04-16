@@ -4,7 +4,6 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -18,12 +17,7 @@ import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.*;
 
-
 import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
@@ -131,7 +125,7 @@ public class WebSocketHandler {
         if (valid) {
             try {
                 chessGame.makeMove(chessMove);
-                sqlGameDAO.makeMove(chessGame);
+                sqlGameDAO.makeMove(chessGame, gameID);
                 if(gameOver(chessGame).equals("WHITE")) {
                     statusNotification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "White is in checkmate");
                 }

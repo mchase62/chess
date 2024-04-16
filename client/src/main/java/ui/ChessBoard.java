@@ -13,7 +13,6 @@ public class ChessBoard {
 
     private static final int BOARD_SIZE_IN_SQUARES = 8;
     private static final int SQUARE_SIZE_IN_CHARS = 1;
-    private static final int LINE_WIDTH_IN_CHARS = 1;
     private static final String EMPTY = "   ";
     private static final String X = " X ";
     private static final String O = " O ";
@@ -33,7 +32,7 @@ public class ChessBoard {
         teamColor = "WHITE";
         drawHeaders(out, teamColor);
 
-        drawTicTacToeBoard(out, teamColor, chessBoard);
+        drawChessBoard(out, teamColor, chessBoard);
 
         drawHeaders(out, teamColor);
 
@@ -42,7 +41,7 @@ public class ChessBoard {
         teamColor = "BLACK";
         drawHeaders(out, teamColor);
 
-        drawTicTacToeBoard(out, teamColor, chessBoard);
+        drawChessBoard(out, teamColor, chessBoard);
 
         drawHeaders(out, teamColor);
         out.print(SET_BG_COLOR_BLACK);
@@ -88,7 +87,7 @@ public class ChessBoard {
         setBlack(out);
     }
 
-    public static void drawTicTacToeBoard(PrintStream out, String teamColor, chess.ChessBoard board) {
+    public static void drawChessBoard(PrintStream out, String teamColor, chess.ChessBoard board) {
         String[] sides = { "1", "2", "3", "4", "5", "6", "7", "8" };
 
         if (teamColor.equals("WHITE")) {

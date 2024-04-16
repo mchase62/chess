@@ -4,11 +4,12 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import client.websocket.ServerMessageHandler;
 import client.websocket.WebSocketFacade;
 import model.GameData;
 import model.UserData;
 import server.ServerFacade;
-import client.websocket.NotificationHandler;
+import client.websocket.ServerMessageHandler;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -17,7 +18,6 @@ import exception.ResponseException;
 
 import ui.ChessBoard;
 
-import static ui.ChessBoard.drawTicTacToeBoard;
 
 public class ChessClient {
     private String gameID = null;
@@ -26,17 +26,17 @@ public class ChessClient {
     private String auth = null;
     private final ServerFacade server;
     private final String serverUrl;
-    private final NotificationHandler notificationHandler;
+    private final ServerMessageHandler serverMessageHandler;
     private State state = State.SIGNEDOUT;
     private GameState gameState = GameState.OUTGAME;
     private WebSocketFacade ws;
     private chess.ChessBoard board;
     ChessGame currentGame;
 
-    public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
+    public ChessClient(String serverUrl, ServerMessageHandler serverMessageHandler) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
-        this.notificationHandler = notificationHandler;
+        this.serverMessageHandler = serverMessageHandler;
     }
 
     public static void main(String[] args) {
@@ -116,7 +116,7 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws ResponseException {
-        ws = new WebSocketFacade(serverUrl, notificationHandler);
+        ws = new WebSocketFacade(serverUrl, serverMessageHandler);
         String playerColor;
         ChessGame.TeamColor color = null;
         assertSignedIn();
