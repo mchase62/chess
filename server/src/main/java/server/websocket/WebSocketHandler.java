@@ -116,7 +116,11 @@ public class WebSocketHandler {
             connections.broadcastMakeMove(auth, notification, gameID);
             connections.broadcastMakeMove(auth, loadGame, gameID);
         }
-
+        else { // not a valid move
+            Error error = new Error(ServerMessage.ServerMessageType.ERROR, "Not a valid move");
+            Connection newConnection = new Connection(auth, session, gameID, null);
+            newConnection.send(error.toString()); // send to current as well
+        }
     }
 
     private String getGame(int gameID) throws IOException {
