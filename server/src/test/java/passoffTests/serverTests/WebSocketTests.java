@@ -217,7 +217,6 @@ public class WebSocketTests {
         Map<String, List<TestModels.TestMessage>> messages =
                 makeMove(white.user, white.authToken, gameID, move,
                         Set.of(black.user, observer.user), Set.of());
-
         assertLoadGameMessage(messages.get(white.user));
         assertMoveMadePair(messages.get(black.user));
         assertMoveMadePair(messages.get(observer.user));

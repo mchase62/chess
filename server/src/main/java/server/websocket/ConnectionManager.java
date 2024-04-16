@@ -28,6 +28,33 @@ public class ConnectionManager {
         connections.remove(auth);
     }
 
+    public void broadcastMakeMove(String excludeAuth, ServerMessage serverMessage, int gameID) throws IOException {
+        switch (serverMessage.getServerMessageType()) {
+            case NOTIFICATION -> serverMessage = new Gson().fromJson(serverMessage.toString(), Notification.class);
+            case LOAD_GAME -> serverMessage = new Gson().fromJson(serverMessage.toString(), LoadGame.class);
+        }
+
+        var removeList = new ArrayList<Connection>();
+        for (var c : connections.values()) {
+            if (c.session.isOpen()) {
+                if(c.gameID == gameID) {
+                    if(serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) { // send load game regardless
+                        c.send(serverMessage.toString());
+                    }
+                    if (!c.auth.equals(excludeAuth) && serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) { // send notification
+                        c.send(serverMessage.toString());
+                    }
+                }
+            }
+            else {
+                removeList.add(c);
+            }
+        }
+        for (var c : removeList) {
+            connections.remove(c.auth);
+        }
+    }
+
     public void broadcastJoinObserve(String excludeAuth, ServerMessage serverMessage, int gameID) throws IOException {
         switch (serverMessage.getServerMessageType()) {
             case NOTIFICATION -> serverMessage = new Gson().fromJson(serverMessage.toString(), Notification.class);

@@ -1,6 +1,11 @@
 package server.websocket;
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -16,8 +21,11 @@ import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.MakeMove;
 import webSocketMessages.userCommands.UserGameCommand;
 
+
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,12 +60,65 @@ public class WebSocketHandler {
     public void makeMove(String auth, String message, Session session, MakeMove move) throws IOException {
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         int gameID = move.getGameID();
-//        try {
-//            return sqlGameDAO.getGame(gameID);
-//        } catch (Exception e) {
-//            throw new IOException();
-//        }
+        ChessMove chessMove;
+        ChessGame chessGame;
+        ChessPosition start;
+        Notification statusNotification = null;
+        boolean valid = false;
+        String game;
+        try {
+            game = sqlGameDAO.getGame(gameID);
+        } catch (Exception e) {
+            throw new IOException();
+        }
+        GameData gameData = new Gson().fromJson(game, GameData.class);
+        chessGame = gameData.game();
+        chessMove = move.getMove();
+        start = chessMove.getStartPosition();
+        if (chessGame.getBoard()==null) { // if the board is empty
+            ChessBoard newBoard = new ChessBoard();
+            newBoard.resetBoard();
+            chessGame.setBoard(newBoard);
+        }
+        for (ChessMove validMove : chessGame.validMoves(start)) {
+            if(validMove.equals(chessMove)) {
+                valid = true;
+                break;
+            }
+        }
+        if (valid) {
+            try {
+                chessGame.makeMove(chessMove);
+                if(gameOver(chessGame).equals("WHITE")) {
+                    statusNotification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "White is in checkmate");
+                }
+                else if(gameOver(chessGame).equals("BLACK")) {
+                    statusNotification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "Black is in checkmate");
+                }
+                else if(inCheck(chessGame).equals("WHITE")) {
+                    statusNotification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "White is in check");
+                }
+                else if(inCheck(chessGame).equals("BLACK")) {
+                    statusNotification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "Black is in check");
+                }
+                System.out.println("CC");
+                if (statusNotification != null) {
+                    Connection newConnection = new Connection(auth, session, gameID, null);
+                    newConnection.send(statusNotification.toString()); // send to current as well
+                    connections.broadcastMakeMove(auth, statusNotification, gameID);
+                }
+            }
+            catch (Exception e) {
+                throw new IOException();
+            }
+            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
+            Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, chessGame.getBoard().getPiece(chessMove.getEndPosition()).getTeamColor().toString() + " made move: " + chessMove.toString());
+            connections.broadcastMakeMove(auth, notification, gameID);
+            connections.broadcastMakeMove(auth, loadGame, gameID);
+        }
+
     }
+
     private String getGame(int gameID) throws IOException {
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         try {
@@ -65,6 +126,31 @@ public class WebSocketHandler {
         } catch (Exception e) {
             throw new IOException();
         }
+    }
+
+    private String gameOver(ChessGame game) {
+        if(game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+            return "WHITE";
+        }
+        else if(game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+            return "BLACK";
+        }
+        else if(game.isInStalemate(ChessGame.TeamColor.BLACK) || game.isInStalemate(ChessGame.TeamColor.WHITE)) {
+            return "DRAW";
+        }
+        else
+            return "NO";
+    }
+
+    private String inCheck(ChessGame game) {
+        if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
+            return "WHITE";
+        }
+        else if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
+            return "BLACK";
+        }
+        else
+            return "NO";
     }
 
     private String[] getUsers(int gameID) throws IOException {
@@ -128,6 +214,7 @@ public class WebSocketHandler {
             }
             Connection observeConnection = new Connection(auth, session, joinObserver.getGameID(), null);
             connections.add(auth, session, joinObserver.getGameID(), null);
+
             loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
             notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " is observing the game. ");
             connections.broadcastJoinObserve(auth, notification, joinObserver.getGameID());
@@ -199,6 +286,7 @@ public class WebSocketHandler {
         }
         if (valid) {
             connections.add(auth, session, joinPlayer.getGameID(), joinPlayer.getPlayerColor().name());
+            
             loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
             notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " joined the game as " + joinPlayer.getPlayerColor().name());
             connections.broadcastJoinObserve(auth, notification, joinPlayer.getGameID());

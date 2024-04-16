@@ -88,7 +88,7 @@ public class ChessBoard {
         setBlack(out);
     }
 
-    private static void drawTicTacToeBoard(PrintStream out, String teamColor, chess.ChessBoard board) {
+    public static void drawTicTacToeBoard(PrintStream out, String teamColor, chess.ChessBoard board) {
         String[] sides = { "1", "2", "3", "4", "5", "6", "7", "8" };
 
         if (teamColor.equals("WHITE")) {

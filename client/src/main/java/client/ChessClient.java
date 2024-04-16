@@ -9,8 +9,15 @@ import model.GameData;
 import model.UserData;
 import server.ServerFacade;
 import client.websocket.NotificationHandler;
+
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import exception.ResponseException;
+
+import ui.ChessBoard;
+
+import static ui.ChessBoard.drawTicTacToeBoard;
 
 public class ChessClient {
     private String gameID = null;
@@ -23,6 +30,8 @@ public class ChessClient {
     private State state = State.SIGNEDOUT;
     private GameState gameState = GameState.OUTGAME;
     private WebSocketFacade ws;
+    private chess.ChessBoard board;
+    ChessGame currentGame;
 
     public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
