@@ -123,7 +123,36 @@ public class SQLGameDAO implements GameDAO{
         }
 
     }
-    public String leaveGame(String playerColor, int gameID) throws DataAccessException {
+
+    public void makeMove(ChessGame game, int gameID) throws DataAccessException {
+        String inputGameJson = new Gson().toJson(game, ChessGame.class);
+        GameData gameData = new Gson().fromJson(inputGameJson, GameData.class);
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT game_json FROM game WHERE game_id=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (var rs = ps.executeQuery()) {
+                    if (!rs.next()) { // if game_json returned null, the gameID doesn't exist
+                        return;
+                    }
+                    else {
+                        String gameJson = rs.getString("game_json");
+                        GameData oldGameData = new Gson().fromJson(gameJson, GameData.class);//entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername()
+                        String white = oldGameData.whiteUsername();
+                        String black = oldGameData.blackUsername();
+                        GameData newGameData = new GameData(oldGameData.gameID(), white, black, oldGameData.gameName(), gameData.game());
+                        var json = new Gson().toJson(newGameData);
+                        var updateStatement = "UPDATE game SET white_username = ?, black_username = ?, game_json =? where game_id = ?";
+                        DatabaseManager.executeUpdate(updateStatement, white, black, json, gameID);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("Unable to get user");
+        }
+    }
+
+    public void leaveGame(String playerColor, int gameID) throws DataAccessException {
         GameData gameData;
         String white;
         String black;
@@ -133,9 +162,9 @@ public class SQLGameDAO implements GameDAO{
                 ps.setInt(1, gameID);
                 try (var rs = ps.executeQuery()) {
                     if (!rs.next()) { // if game_json returned null, the gameID doesn't exist
-                        return "bad request";
+                        return;
                     } else if (playerColor == null) {
-                        return "success";
+                        return;
                     } else {
                         String gameJson = rs.getString("game_json");
                         gameData = new Gson().fromJson(gameJson, GameData.class);//entry.getKey(), entry.getValue().gameName(), entry.getValue().whiteUsername(), entry.getValue().blackUsername()
@@ -149,7 +178,6 @@ public class SQLGameDAO implements GameDAO{
                         var json = new Gson().toJson(newGameData);
                         var updateStatement = "UPDATE game SET white_username = ?, black_username = ?, game_json =? where game_id = ?";
                         DatabaseManager.executeUpdate(updateStatement, white, black, json, gameID); // returns 0 if game was not made
-                        return "success";
                     }
                 }
             }

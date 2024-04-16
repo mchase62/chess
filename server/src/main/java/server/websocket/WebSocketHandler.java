@@ -72,7 +72,6 @@ public class WebSocketHandler {
         int gameID = connections.getConnection(auth, session).getGameID();
         String user = getUser(auth);
         String playerColor=null;
-        System.out.println("HERE");
         if(connections.getConnection(auth, session) != null) {
             playerColor = connections.getConnection(auth, session).getPlayerColor();
         }
@@ -80,11 +79,8 @@ public class WebSocketHandler {
         connections.remove(auth);
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         try {
-            System.out.println("UPDATING THE GAME");
-            System.out.println(playerColor);
             sqlGameDAO.leaveGame(playerColor, gameID);
         } catch (Exception e) {
-            System.out.println(e.toString());
             throw new IOException();
         }
         Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " left the game");
@@ -135,6 +131,7 @@ public class WebSocketHandler {
         if (valid) {
             try {
                 chessGame.makeMove(chessMove);
+                sqlGameDAO.makeMove(chessGame);
                 if(gameOver(chessGame).equals("WHITE")) {
                     statusNotification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "White is in checkmate");
                 }
