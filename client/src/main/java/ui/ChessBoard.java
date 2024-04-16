@@ -93,38 +93,29 @@ public class ChessBoard {
 
         if (teamColor.equals("WHITE")) {
             for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) { // loop throw each row and draw squares
-
-                out.print(SET_BG_COLOR_LIGHT_GREY);
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(" " + sides[boardRow] + " ");
-
-                drawRowOfSquares(out, boardRow, board);
-
-                out.print(SET_BG_COLOR_LIGHT_GREY);
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(" " + sides[boardRow] + " ");
-
-                setBlack(out);
-                out.println();
+                drawSquares(boardRow, sides, out, board);
             }
         }
         else {
             for (int boardRow = BOARD_SIZE_IN_SQUARES - 1; boardRow >= 0 ; --boardRow) {
-
-                out.print(SET_BG_COLOR_LIGHT_GREY);
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(" " + sides[boardRow] + " ");
-
-                drawRowOfSquares(out, boardRow, board);
-
-                out.print(SET_BG_COLOR_LIGHT_GREY);
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(" " + sides[boardRow] + " ");
-
-                setBlack(out);
-                out.println();
+                drawSquares(boardRow, sides, out, board);
             }
         }
+    }
+
+    private static void drawSquares(int boardRow, String[] sides, PrintStream out, chess.ChessBoard board) {
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(" " + sides[boardRow] + " ");
+
+        drawRowOfSquares(out, boardRow, board);
+
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(" " + sides[boardRow] + " ");
+
+        setBlack(out);
+        out.println();
     }
 
     private static void drawRowOfSquares(PrintStream out, int boardRow, chess.ChessBoard board) {
