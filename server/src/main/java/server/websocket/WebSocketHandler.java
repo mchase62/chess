@@ -49,11 +49,33 @@ public class WebSocketHandler {
     }
 
     public void resign(String auth, String message, Session session, Resign resign) throws IOException {
-
+        if(connections.getConnection(auth, session) == null) {
+            Connection newConnection = new Connection(auth, session, 0 , null);
+            Error error = new Error(ServerMessage.ServerMessageType.ERROR, "error: no game to resign from");
+            newConnection.send(error.toString());
+        }
+        else if(connections.getConnection(auth, session).getPlayerColor() == null) {
+            Connection newConnection = new Connection(auth, session, 0 , null);
+            Error error = new Error(ServerMessage.ServerMessageType.ERROR, "error: observer cannot make move");
+            newConnection.send(error.toString());
+        }
+        else {
+            int gameID = connections.getConnection(auth, session).getGameID();
+            String user = getUser(auth);
+            Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " has resigned");
+            connections.broadcastJoinObserve(auth, notification, gameID);
+            connections.getConnection(auth, session).send(notification.toString());
+        }
     }
+
     public void leave(String auth, String message, Session session, Leave leave) throws IOException {
-
+        int gameID = connections.getConnection(auth, session).getGameID();
+        String user = getUser(auth);
+        connections.remove(auth);
+        Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " left the game");
+        connections.broadcastJoinObserve(auth, notification, gameID);
     }
+
     public void makeMove(String auth, String message, Session session, MakeMove move) throws IOException {
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         int gameID = move.getGameID();

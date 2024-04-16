@@ -60,6 +60,7 @@ public class ChessClient {
                 case "observe" -> observeGame(params);
                 case "join" -> joinGame(params);
                 case "list" -> listGames();
+                case "make move" -> makeMove(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -73,8 +74,6 @@ public class ChessClient {
             userName = params[0];
             password = params[1];
             String email = params[2];
-
-//            ws.enterChessServer(userName);
             UserData newUser = new UserData(userName, password, email);
             server.register(newUser);
             auth = server.login(newUser).authToken();
@@ -234,6 +233,11 @@ public class ChessClient {
         ChessMove move = new ChessMove(start, end, promotionPiece);
         ws.makeMove(auth, Integer.parseInt(gameID), move);
         throw new ResponseException(400, "Expected: <Letter><Number> <Letter><Number> <Promotion Piece>");
+    }
+
+    public String leave(String... params) throws ResponseException {
+        ws.leave(auth, Integer.parseInt(gameID));
+        return "Left Game";
     }
 
     public String help() {
