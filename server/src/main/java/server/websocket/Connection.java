@@ -24,10 +24,6 @@ public class Connection {
         return gameID;
     }
 
-    public void setGameID(int gameID) {
-        this.gameID = gameID;
-    }
-
     public void send(String msg) throws IOException {
         session.getRemote().sendString(msg);
     }

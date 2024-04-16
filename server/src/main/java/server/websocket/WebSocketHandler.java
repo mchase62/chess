@@ -16,10 +16,7 @@ import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinObserver;
-import webSocketMessages.userCommands.JoinPlayer;
-import webSocketMessages.userCommands.MakeMove;
-import webSocketMessages.userCommands.UserGameCommand;
+import webSocketMessages.userCommands.*;
 
 
 import java.io.IOException;
@@ -41,22 +38,22 @@ public class WebSocketHandler {
     public void onMessage(Session session, String message) throws IOException {
 
         UserGameCommand userCommand = new Gson().fromJson(message, UserGameCommand.class);
-//        var conn = connections.getConnection(userCommand.getAuthString(), session);
-//        if (conn != null) {
-            switch (userCommand.getCommandType()) {
-                case JOIN_PLAYER ->
-                        joinPlayer(userCommand.getAuthString(), message, session, new Gson().fromJson(message, JoinPlayer.class));
-                case JOIN_OBSERVER -> joinObserver(userCommand.getAuthString(), message, session, new Gson().fromJson(message, JoinObserver.class));
-                case MAKE_MOVE -> makeMove(userCommand.getAuthString(), message, session, new Gson().fromJson(message, MakeMove.class));
-                case LEAVE -> enter("", session);
-                case RESIGN -> enter("", session);
-            }
-//        }
-//        else {
-//            System.out.println("Send error here");
-//        }
+        switch (userCommand.getCommandType()) {
+            case JOIN_PLAYER ->
+                    joinPlayer(userCommand.getAuthString(), message, session, new Gson().fromJson(message, JoinPlayer.class));
+            case JOIN_OBSERVER -> joinObserver(userCommand.getAuthString(), message, session, new Gson().fromJson(message, JoinObserver.class));
+            case MAKE_MOVE -> makeMove(userCommand.getAuthString(), message, session, new Gson().fromJson(message, MakeMove.class));
+            case LEAVE -> leave(userCommand.getAuthString(), message, session, new Gson().fromJson(message, Leave.class));
+            case RESIGN -> resign(userCommand.getAuthString(), message, session, new Gson().fromJson(message, Resign.class));
+        }
     }
 
+    public void resign(String auth, String message, Session session, Resign resign) throws IOException {
+
+    }
+    public void leave(String auth, String message, Session session, Leave leave) throws IOException {
+
+    }
     public void makeMove(String auth, String message, Session session, MakeMove move) throws IOException {
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         int gameID = move.getGameID();
@@ -235,7 +232,6 @@ public class WebSocketHandler {
             notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " is observing the game. ");
             connections.broadcastJoinObserve(auth, notification, joinObserver.getGameID());
             observeConnection.send(loadGame.toString());
-//            connections.broadcastJoinObserve(auth, loadGame, joinObserver.getGameID());
         }
         else {
             error = new Error(ServerMessage.ServerMessageType.ERROR, "error: game doesn't exist");
@@ -313,21 +309,5 @@ public class WebSocketHandler {
             Connection errorConnection = new Connection(auth, session, 0, null);
             errorConnection.send(error.toString());
         }
-    }
-
-
-    private void enter(String userName, Session session) throws IOException {
-        var message = String.format("%s is online", userName);
-        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
-//        connections.broadcast(userName, notification);
-    }
-
-
-
-    private void exit(String visitorName) throws IOException {
-        connections.remove(visitorName);
-        var message = String.format("%s is offline", visitorName);
-        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
-//        connections.broadcast(visitorName, notification);
     }
 }
