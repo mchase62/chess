@@ -24,12 +24,12 @@ public class ChessBoard {
         chessBoard.resetBoard();
 
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        String teamColor;
+        String teamColor = args[0];
 
         out.print(ERASE_SCREEN);
 
         // draw white's board
-        teamColor = "WHITE";
+
         drawHeaders(out, teamColor);
 
         drawChessBoard(out, teamColor, chessBoard);
@@ -37,15 +37,24 @@ public class ChessBoard {
         drawHeaders(out, teamColor);
 
         out.println();
-        // draw black's board
-        teamColor = "BLACK";
-        drawHeaders(out, teamColor);
-
-        drawChessBoard(out, teamColor, chessBoard);
-
-        drawHeaders(out, teamColor);
+//        // draw black's board
+//        teamColor = "BLACK";
+//        drawHeaders(out, teamColor);
+//
+//        drawChessBoard(out, teamColor, chessBoard);
+//
+//        drawHeaders(out, teamColor);
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
+    }
+
+    public static void drawBoard(String teamColor, chess.ChessBoard board) {
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        drawHeaders(out, teamColor);
+
+        drawChessBoard(out, teamColor, board);
+
+        drawHeaders(out, teamColor);
     }
 
     private static void drawHeaders(PrintStream out, String teamColor) {

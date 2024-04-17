@@ -5,7 +5,7 @@ package client.websocket;
 import webSocketMessages.serverMessages.ServerMessage;
 
 public interface ServerMessageHandler {
-    void serverMessage(ServerMessage serverMessage);
+    void serverMessage(ServerMessage serverMessage, String message);
 
     // make chess board in notify function
 }

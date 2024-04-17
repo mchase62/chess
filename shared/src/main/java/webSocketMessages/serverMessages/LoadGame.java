@@ -19,6 +19,7 @@ public class LoadGame extends ServerMessage {
 //        drawTicTacToeBoard(PrintStream out, String teamColor, chess.ChessBoard board)
     }
 
+    public ChessGame getGame() { return game; }
     public String toString() {
         return new Gson().toJson(this);
     }

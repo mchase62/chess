@@ -8,18 +8,24 @@ import client.websocket.ServerMessageHandler;
 import client.websocket.WebSocketFacade;
 import model.GameData;
 import model.UserData;
+import org.glassfish.tyrus.core.wsadl.model.Endpoint;
 import server.ServerFacade;
 import client.websocket.ServerMessageHandler;
-
+import javax.websocket.*;
 import java.io.PrintStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import exception.ResponseException;
 
 import ui.ChessBoard;
 
+import javax.websocket.ContainerProvider;
+import javax.websocket.WebSocketContainer;
 
-public class ChessClient {
+
+public class ChessClient extends Endpoint {
+    private String playerColor;
     private String gameID = null;
     private String userName = null;
     private String password = null;
@@ -30,6 +36,7 @@ public class ChessClient {
     private State state = State.SIGNEDOUT;
     private GameState gameState = GameState.OUTGAME;
     private WebSocketFacade ws;
+    private Session session;
     private chess.ChessBoard board;
     ChessGame currentGame;
 
@@ -37,6 +44,20 @@ public class ChessClient {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
         this.serverMessageHandler = serverMessageHandler;
+//        try {
+//            URI uri = new URI("ws://localhost:8080/connect");
+//            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+//            this.session = container.connectToServer(this, uri);
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+//            public void onMessage(String message) {
+//                System.out.println(message);
+//            }
+//        }
     }
 
     public static void main(String[] args) {
@@ -115,9 +136,11 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: create <NAME>");
     }
 
+    public String getPlayerColor() {
+        return playerColor;
+    }
     public String joinGame(String... params) throws ResponseException {
         ws = new WebSocketFacade(serverUrl, serverMessageHandler);
-        String playerColor;
         ChessGame.TeamColor color = null;
         assertSignedIn();
         if (params.length >= 1) {
@@ -260,6 +283,7 @@ public class ChessClient {
                     make move <Letter><Number> <Letter><Number> <Promotion Piece>
                     resign - resign from current game
                     highlight moves <Letter><Number> - highlights all legal moves for position selected
+                    help
                     """;
         }
         return """

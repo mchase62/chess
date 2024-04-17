@@ -2,7 +2,8 @@ package clientTests;
 
 import chess.ChessGame;
 import client.ChessClient;
-import client.websocket.NotificationHandler;
+import client.websocket.ServerMessageHandler;
+import client.websocket.ServerMessageHandler;
 import dataAccess.*;
 import exception.ResponseException;
 import model.AuthData;
@@ -11,7 +12,7 @@ import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
-import webSocketMessages.serverMessages.Notification;
+import webSocketMessages.serverMessages.ServerMessage;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,13 +23,13 @@ public class ServerFacadeTests {
     public static ChessClient client;
     public static ServerFacade sf;
 //    private final NotificationHandler notificationHandler;
-    public class NotificationHandlerImpl implements NotificationHandler {
-        @Override
-        public void notify(Notification notification) {
-
-        }
-
-    }
+//    public class ServerMessageHandlerImpl implements ServerMessageHandler {
+//        @Override
+//        public void serverMessage(ServerMessage notification) {
+//
+//        }
+//
+//    }
     @BeforeAll
     public static void init() {
         server = new Server();

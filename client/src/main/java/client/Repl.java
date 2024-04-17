@@ -1,12 +1,17 @@
 package client;
 
 import client.websocket.ServerMessageHandler;
+import com.google.gson.Gson;
+import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 import ui.ChessBoard;
 import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.MakeMove;
 
 public class Repl implements ServerMessageHandler {
     private final ChessClient client;
@@ -44,9 +49,21 @@ public class Repl implements ServerMessageHandler {
     }
 
     @Override
-    public void serverMessage(ServerMessage serverMessage) {
-        System.out.println(SET_TEXT_COLOR_RED + serverMessage.toString());
-
+    public void serverMessage(ServerMessage serverMessage, String message) {
+        if(serverMessage.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
+            var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+            LoadGame loadGame = new Gson().fromJson(message, LoadGame.class);
+            String teamColor = client.getPlayerColor();
+            ChessBoard.drawBoard(teamColor, loadGame.getGame().getBoard());
+        }
+        else if(serverMessage.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION)) {
+            Notification notification = new Gson().fromJson(message, Notification.class);
+            System.out.println(SET_TEXT_COLOR_RED + notification.getMessage());
+        }
+        else if(serverMessage.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)) {
+            Error error = new Gson().fromJson(message, Error.class);
+            System.out.println(SET_TEXT_COLOR_RED + error.getMessage());
+        }
         printPrompt();
     }
 }

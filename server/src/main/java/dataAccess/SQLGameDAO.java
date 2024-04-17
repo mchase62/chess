@@ -20,7 +20,7 @@ public class SQLGameDAO implements GameDAO{
             game_name varchar(256) NOT NULL,
             white_username varchar(256),
             black_username varchar(256),
-            game_json varchar(256),
+            game_json text,
             PRIMARY KEY (id)
             );
             """

@@ -72,6 +72,7 @@ public class SQLUserDAO implements UserDAO{
                 }
             }
         }catch (Exception e) {
+            e.printStackTrace();
             throw new DataAccessException("Unable to get user");
         }
     }
