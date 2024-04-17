@@ -51,10 +51,11 @@ public class Repl implements ServerMessageHandler {
     @Override
     public void serverMessage(ServerMessage serverMessage, String message) {
         if(serverMessage.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
-            var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
             LoadGame loadGame = new Gson().fromJson(message, LoadGame.class);
             String teamColor = client.getPlayerColor();
-            ChessBoard.drawBoard(teamColor, loadGame.getGame().getBoard());
+            chess.ChessBoard board = loadGame.getGame().getBoard();
+            System.out.println();
+            ChessBoard.drawBoard(teamColor, board);
         }
         else if(serverMessage.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION)) {
             Notification notification = new Gson().fromJson(message, Notification.class);

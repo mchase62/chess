@@ -30,42 +30,31 @@ public class ChessBoard {
 
         // draw white's board
 
-        drawHeaders(out, teamColor);
+        drawHeaders(out);
 
         drawChessBoard(out, teamColor, chessBoard);
 
-        drawHeaders(out, teamColor);
+        drawHeaders(out);
 
         out.println();
-//        // draw black's board
-//        teamColor = "BLACK";
-//        drawHeaders(out, teamColor);
-//
-//        drawChessBoard(out, teamColor, chessBoard);
-//
-//        drawHeaders(out, teamColor);
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
     public static void drawBoard(String teamColor, chess.ChessBoard board) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        drawHeaders(out, teamColor);
+        drawHeaders(out);
 
         drawChessBoard(out, teamColor, board);
 
-        drawHeaders(out, teamColor);
+        drawHeaders(out);
     }
 
-    private static void drawHeaders(PrintStream out, String teamColor) {
-        String[] whiteHeaders = { "h", "g", "f", "e", "d", "c", "b", "a" };
-        String[] blackHeaders = { "a", "b", "c", "d", "e", "f", "g", "h" };
-        String[] headers;
+    private static void drawHeaders(PrintStream out) {
+        String[] headers = { "h", "g", "f", "e", "d", "c", "b", "a" };
+
         setBlack(out);
-        if (teamColor.equals("WHITE"))
-            headers = whiteHeaders;
-        else
-            headers = blackHeaders;
+
 
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);

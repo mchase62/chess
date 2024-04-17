@@ -81,13 +81,24 @@ public class ChessClient extends Endpoint {
                 case "observe" -> observeGame(params);
                 case "join" -> joinGame(params);
                 case "list" -> listGames();
-                case "make move" -> makeMove(params);
+                case "move" -> makeMove(params);
                 case "leave" -> leave(params);
+                case "redraw" -> redraw(params);
                 case "quit" -> "quit";
                 default -> help();
             };
         } catch (ResponseException ex) {
             return ex.getMessage();
+        }
+    }
+
+    public String redraw(String... params) throws ResponseException {
+        try {
+        ws.redraw(auth, Integer.parseInt(gameID));
+        return "redrew board";
+        }
+        catch (Error e) {
+            throw new ResponseException(400, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
         }
     }
 
@@ -208,18 +219,18 @@ public class ChessClient extends Endpoint {
             throw new ResponseException(400, "Expected: <Letter><Number> <Letter><Number> <Promotion Piece>");
         }
 
-        int col = 0;
+        int col=0;
         int row;
         row = Integer.parseInt(String.valueOf(input.charAt(1)));
         switch (input.charAt(0)) {
-            case 'a' -> col = 1;
-            case 'b' -> col = 2;
-            case 'c' -> col = 3;
-            case 'd' -> col = 4;
-            case 'e' -> col = 5;
-            case 'f' -> col = 6;
-            case 'g' -> col = 7;
-            case 'h' -> col = 8;
+            case 'a' -> col = 2;
+            case 'b' -> col = 3;
+            case 'c' -> col = 4;
+            case 'd' -> col = 5;
+            case 'e' -> col = 6;
+            case 'f' -> col = 7;
+            case 'g' -> col = 8;
+            case 'h' -> col = 9;
         }
         return new ChessPosition(row, col);
     }
@@ -258,7 +269,7 @@ public class ChessClient extends Endpoint {
         catch(Exception e) {
             throw new ResponseException(400, e.toString());
         }
-        return "made move";
+        return "move made";
     }
 
     public String leave(String... params) throws ResponseException {
@@ -280,7 +291,7 @@ public class ChessClient extends Endpoint {
             return """
                     redraw - redraws chessboard
                     leave - leaves current game
-                    make move <Letter><Number> <Letter><Number> <Promotion Piece>
+                    move <Letter><Number> <Letter><Number> <Promotion Piece>
                     resign - resign from current game
                     highlight moves <Letter><Number> - highlights all legal moves for position selected
                     help

@@ -11,12 +11,9 @@ import java.nio.charset.StandardCharsets;
 public class LoadGame extends ServerMessage {
     ChessGame game;
 
-    public LoadGame(ServerMessageType type, String gameJson) {
+    public LoadGame(ServerMessageType type, ChessGame game) {
         super(type);
-        GameData gameData = new Gson().fromJson(gameJson, GameData.class);
-        this.game = gameData.game();
-//        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-//        drawTicTacToeBoard(PrintStream out, String teamColor, chess.ChessBoard board)
+        this.game = game;
     }
 
     public ChessGame getGame() { return game; }

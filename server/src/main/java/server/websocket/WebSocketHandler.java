@@ -39,6 +39,7 @@ public class WebSocketHandler {
             case MAKE_MOVE -> makeMove(userCommand.getAuthString(), message, session, new Gson().fromJson(message, MakeMove.class));
             case LEAVE -> leave(userCommand.getAuthString(), message, session, new Gson().fromJson(message, Leave.class));
             case RESIGN -> resign(userCommand.getAuthString(), message, session, new Gson().fromJson(message, Resign.class));
+            case REDRAW -> redraw(userCommand.getAuthString(), message, session, new Gson().fromJson(message, Redraw.class));
         }
     }
 
@@ -81,6 +82,23 @@ public class WebSocketHandler {
         connections.broadcastJoinObserve(auth, notification, gameID);
     }
 
+    public void redraw(String auth, String message, Session session, Redraw redraw) throws IOException {
+        String game;
+        SQLGameDAO sqlGameDAO = new SQLGameDAO();
+        int gameID = redraw.getGameID();
+        ChessGame chessGame;
+        try {
+            game = sqlGameDAO.getGame(gameID);
+        } catch (Exception e) {
+            throw new IOException();
+        }
+        chessGame = new Gson().fromJson(game, ChessGame.class);
+        LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, chessGame);
+        Connection newConnection = new Connection(auth, session, gameID, null);
+        newConnection.send(loadGame.toString());
+
+    }
+
     public void makeMove(String auth, String message, Session session, MakeMove move) throws IOException {
         SQLGameDAO sqlGameDAO = new SQLGameDAO();
         int gameID = move.getGameID();
@@ -95,8 +113,7 @@ public class WebSocketHandler {
         } catch (Exception e) {
             throw new IOException();
         }
-        GameData gameData = new Gson().fromJson(game, GameData.class);
-        chessGame = gameData.game();
+        chessGame = new Gson().fromJson(game, ChessGame.class);
         chessMove = move.getMove();
         start = chessMove.getStartPosition();
         if (chessGame.getBoard()==null) { // if the board is empty
@@ -138,7 +155,6 @@ public class WebSocketHandler {
                 else if(inCheck(chessGame).equals("BLACK")) {
                     statusNotification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "Black is in check");
                 }
-                System.out.println("CC");
                 if (statusNotification != null) {
                     Connection newConnection = new Connection(auth, session, gameID, null);
                     newConnection.send(statusNotification.toString()); // send to current as well
@@ -148,10 +164,10 @@ public class WebSocketHandler {
             catch (Exception e) {
                 throw new IOException();
             }
-            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
+            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, chessGame);
             Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, chessGame.getBoard().getPiece(chessMove.getEndPosition()).getTeamColor().toString() + " made move: " + chessMove.toString());
-            connections.broadcastMakeMove(auth, notification, gameID);
             connections.broadcastMakeMove(auth, loadGame, gameID);
+            connections.broadcastMakeMove(auth, notification, gameID);
         }
         else { // not a valid move
             Error error = new Error(ServerMessage.ServerMessageType.ERROR, "error: not a valid move");
@@ -255,7 +271,8 @@ public class WebSocketHandler {
             Connection observeConnection = new Connection(auth, session, joinObserver.getGameID(), null);
             connections.add(auth, session, joinObserver.getGameID(), null);
 
-            loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
+            ChessGame chessGame = new Gson().fromJson(game, ChessGame.class);
+            loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, chessGame);
             notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " is observing the game. ");
             connections.broadcastJoinObserve(auth, notification, joinObserver.getGameID());
             observeConnection.send(loadGame.toString());
@@ -325,8 +342,9 @@ public class WebSocketHandler {
         }
         if (valid) {
             connections.add(auth, session, joinPlayer.getGameID(), joinPlayer.getPlayerColor().name());
-            
-            loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
+
+            ChessGame chessGame = new Gson().fromJson(game, ChessGame.class);
+            loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, chessGame);
             notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, user + " joined the game as " + joinPlayer.getPlayerColor().name());
             connections.broadcastJoinObserve(auth, notification, joinPlayer.getGameID());
             connections.broadcastJoinObserve(auth, loadGame, joinPlayer.getGameID());

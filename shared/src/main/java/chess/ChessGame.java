@@ -120,9 +120,7 @@ public class ChessGame {
         }
         board.addPiece(move.getStartPosition(), null); // make its old location null
         board.addPiece(move.getEndPosition(), movingPiece); // move it to the new spot
-        // throw exception if piece can't move there, if move leaves king in danger, or not your turn
-//        if (movingPiece!=null) {
-//        }
+
         if (movingPiece == null || isInCheck(movingPiece.getTeamColor()) || !getTeamTurn().equals(movingPiece.getTeamColor())) {// see if the king is now in danger
             undoMove(move,replacingPiece);
             throw new InvalidMoveException("Invalid move: " + move);
@@ -131,7 +129,6 @@ public class ChessGame {
             undoMove(move,replacingPiece);
             throw new InvalidMoveException("Invalid move: " + move);
         }
-        // switch turns
         switchTurns();
     }
 

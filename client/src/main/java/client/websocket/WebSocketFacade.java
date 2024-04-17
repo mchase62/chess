@@ -4,6 +4,7 @@ import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
+import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.userCommands.*;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -49,6 +50,16 @@ public class WebSocketFacade extends Endpoint {
             gameCommand.setCommandType(UserGameCommand.CommandType.MAKE_MOVE);
             this.session.getBasicRemote().sendText(new Gson().toJson(gameCommand));
         }  catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void redraw(String auth, int gameID) throws ResponseException {
+        try {
+            Redraw gameCommand = new Redraw(auth, gameID);
+            gameCommand.setCommandType(UserGameCommand.CommandType.REDRAW);
+            this.session.getBasicRemote().sendText(new Gson().toJson(gameCommand));
+        } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());
         }
     }
